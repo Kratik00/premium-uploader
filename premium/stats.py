@@ -1,6 +1,7 @@
 import time
 import sys
 import motor
+from pyrogram import Client
 from main import bot
 from pyrogram import filters
 from vars import OWNER_ID

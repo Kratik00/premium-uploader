@@ -1,6 +1,7 @@
 from datetime import timedelta
 import pytz
 import datetime, time
+from pyrogram import Client
 from main import bot
 from vars import  PREMIUM_LOGS, OWNER_ID
 from premium.function import get_seconds
