@@ -286,7 +286,6 @@ async def chk_premium_cmd(client, message):
     exp = data["expire_date"].astimezone(pytz.timezone("Asia/Kolkata")).strftime("%d-%m-%Y %I:%M %p")
 
     await message.reply(f"YES PREMIUM\nTill `{exp}`")
-    )
 
 @bot.on_message(filters.command(["t2t"]))
 async def text_to_txt(client, message: Message):
