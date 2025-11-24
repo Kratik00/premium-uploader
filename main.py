@@ -711,10 +711,10 @@ async def txt_handler(bot: Client, m: Message):
                 cmd = f'yt-dlp -f "{ytf}" "{url}" -o "{name}.mp4"'
 
             try:
-                cc = f"**╭━━━━━ INFO ━━━━━╮**\n💫 **Video ID:** `{str(count).zfill(3)}`\n**╰━━━━━━━━━━━━━━╯**\n\n📁 **Title:** `{name1} ({res}) lucifer.mkv`\n📚 **Course:** `{b_name}`\n\n⚡ **Downloaded By:** `{CR}`"
-                cc1 = f"<blockquote>╭━━━━━ INFO ━━━━━╮\n💫 <b>File ID:</b> <b>{str(count).zfill(3)}</b>\n╰━━━━━━━━━━━━━━╯\n\n📁 <b>Title:</b> <b>{name1} lucifer.pdf</b>\n📚 <b>Course:</b> <b>{b_name}</b>\n\n⚡ <b>Downloaded By:</b> <b>{CR}</b></blockquote>"
+                cc = f"**╭━━━━━ INFO ━━━━━╮**\n💫 **Video ID:** `{str(count).zfill(3)}`\n**╰━━━━━━━━━━━━━━╯**\n\n📁 **Title:** `{name1} ({res}) lucifer.mkv`\n📚 **Course:** `{b_name}`\n\n⚡ **Downloaded By:** {CR}"
+                cc1 = f"<blockquote>╭━━━━━ INFO ━━━━━╮\n💫 <b>File ID:</b> <b>{str(count).zfill(3)}</b>\n╰━━━━━━━━━━━━━━╯\n\n📁 <b>Title:</b> <b>{name1} lucifer.pdf</b>\n📚 <b>Course:</b> <b>{b_name}</b>\n\n⚡ **Downloaded By:** {CR}</blockquote>"
                 cczip = f"**——— ✦ {str(count).zfill(3)} ✦ ———**\n\n📁 **Title:** `{name1}.zip`\n📚 **Course:** `{b_name}`\n\n⚡ **Extracted By:** {CR}"
-                ccimg = f"**╭━━━━ IMAGE ━━━━╮**\n💫 **Image ID:** `{str(count).zfill(3)}`\n**╰━━━━━━━━━━━━━━╯**\n\n📁 **Title:** `{name1} lucifer.JPG`\n📚 **Course:** `{b_name}`\n\n⚡ **Downloaded By:** `{CR}`"
+                ccimg = f"**╭━━━━ IMAGE ━━━━╮**\n💫 **Image ID:** `{str(count).zfill(3)}`\n**╰━━━━━━━━━━━━━━╯**\n\n📁 **Title:** `{name1} lucifer.JPG`\n📚 **Course:** `{b_name}`\n\n⚡ **Downloaded By:** {CR}"
                 ccm = f"**——— ✦ {str(count).zfill(3)} ✦ ———**\n\n🎵 **Title:** `{name1}.mp3`\n📚 **Course:** `{b_name}`\n\n⚡ **Extracted By:** {CR}"
                 cchtml = f"**——— ✦ {str(count).zfill(3)} ✦ ———**\n\n🌐 **Title:** `{name1}.html`\n📚 **Course:** `{b_name}`\n\n⚡ **Extracted By:** {CR}"
     

@@ -300,13 +300,16 @@ async def download_video(url,cmd, name):
 
 
 async def send_doc(bot: Client, m: Message, cc, ka, cc1, prog, count, name):
-    reply = await m.reply_text(
-        f"**💌 Just for you, my love... Your content is on its way to you ☁️**\n\n"
-        f"**📖 Title »** `{name}`\n\n"
-        f"**With all my love, always and forever...**\n"
-        f"— **Your one and only,**\n"
-        f"**@chitijrajput**"
-)
+    await prog.delete()
+
+    await m.reply_text(
+        f"**📂 Document processing finished**\n\n"
+        f"**📌 Title :** `{name}`\n"
+        f"**🗂 Type :** Document\n"
+        f"**📦 Status :** Ready for upload\n"
+        f"**⚙️ Task :** Completed successfully\n\n"
+        f"**▶️ Upload will begin shortly...**"
+    )
     time.sleep(1)
     start_time = time.time()
     await bot.send_document(ka, caption=cc1)
@@ -340,16 +343,22 @@ async def download_and_decrypt_video(url, cmd, name, key):
             print(f"Failed to decrypt {video_path}.")  
             return None  
 
-async def send_vid(bot: Client, m: Message,cc,filename,thumb,name,prog):
-    subprocess.run(f'ffmpeg -i "{filename}" -ss 00:00:10 -vframes 1 "{filename}.jpg"', shell=True)
-    await prog.delete (True)
-    reply = await m.reply_text(
-        f"**💌 Just for you, my love... Your content is on its way to you ☁️**\n\n"
-        f"**📖 Title »** `{name}`\n\n"
-        f"**With all my love, always and forever...**\n"
-        f"— **Your one and only,**\n"
-        f"**@chitijrajput**"
-)
+async def send_vid(bot: Client, m: Message, cc, filename, thumb, name, prog):
+    # generate thumbnail
+    subprocess.run(
+        f'ffmpeg -i "{filename}" -ss 00:00:10 -vframes 1 "{filename}.jpg"',
+        shell=True
+    )
+
+    await prog.delete()
+
+    await m.reply_text(
+        f"📌 File Processed Successfully\n\n"
+        f"📁 **Name:** `{name}`\n"
+        f"📦 **Status:** Ready To Upload\n"
+        f"🛠 **Task:** Completed Without Errors\n\n"
+        f"▶️ Video will be sent shortly...\n"
+    )
 
     try:
         if thumb == "/d":
