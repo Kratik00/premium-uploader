@@ -499,7 +499,7 @@ async def send_logs(client: Client, m: Message):  # Correct parameter name
 
 @bot.on_message(filters.command(["upload"]) )
 async def txt_handler(bot: Client, m: Message):
-    data = await plans_db.check_premium(m.from_user.id)
+    data = await check_premium_user(m.from_user.id)
     if not data or not data.get("expire_date"):
         return await m.reply_text(
             "**❌ Premium Required**\n\n"
