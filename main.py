@@ -34,6 +34,11 @@ from pyrogram.errors import FloodWait
 from pyrogram.errors.exceptions.bad_request_400 import StickerEmojiInvalid
 from pyrogram.types.messages_and_media import message
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from premium.function import *
+from premium.plans import *
+from premium.plans_db import *
+from premium.stats import *
+from premium.usersdb import *
 import aiohttp
 import aiofiles
 import zipfile
@@ -78,11 +83,6 @@ async def show_random_sticker(message):
     sticker_message = await message.reply_sticker(selected_sticker)
     return sticker_message
 
-from premium import function
-from premium import plans
-from premium import stats
-from premium import usersdb
-import utils
 # Romantic Inline keyboard for start command
 BUTTONSCONTACT = InlineKeyboardMarkup(
     [
