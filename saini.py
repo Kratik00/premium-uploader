@@ -302,14 +302,14 @@ async def download_video(url,cmd, name):
 async def send_doc(bot: Client, m: Message, cc, ka, cc1, prog, count, name):
     await prog.delete()
 
-    await m.reply_text(
-        f"**📂 Document processing finished**\n\n"
-        f"**📌 Title :** `{name}`\n"
-        f"**🗂 Type :** Document\n"
-        f"**📦 Status :** Ready for upload\n"
-        f"**⚙️ Task :** Completed successfully\n\n"
-        f"**▶️ Upload will begin shortly...**"
+    reply = await m.reply_text(
+        f"**📦 Document is being processed**\n\n"
+        f"**📄 Title »** `{name}`\n\n"
+        f"**Status: Processing complete.**\n"
+        f"**Preparing file for delivery…**\n\n"
+        f"**— System Notification - @noobhusir**"
     )
+
     time.sleep(1)
     start_time = time.time()
     await bot.send_document(ka, caption=cc1)
@@ -344,21 +344,18 @@ async def download_and_decrypt_video(url, cmd, name, key):
             return None  
 
 async def send_vid(bot: Client, m: Message, cc, filename, thumb, name, prog):
-    # generate thumbnail
-    subprocess.run(
-        f'ffmpeg -i "{filename}" -ss 00:00:10 -vframes 1 "{filename}.jpg"',
-        shell=True
+    subprocess.run(f'ffmpeg -i "{filename}" -ss 00:00:10 -vframes 1 "{filename}.jpg"', shell=True)
+
+    await prog.delete(True)
+
+    reply = await m.reply_text(
+        f"**📦 Processing Complete**\n\n"
+        f"**📽 Title »** `{name}`\n\n"
+        f"**Your video is being prepared for upload.**\n"
+        f"**Please wait…**\n\n"
+        f"**— Uploader System- @noobhusir**"
     )
 
-    await prog.delete()
-
-    await m.reply_text(
-        f"📌 File Processed Successfully\n\n"
-        f"📁 **Name:** `{name}`\n"
-        f"📦 **Status:** Ready To Upload\n"
-        f"🛠 **Task:** Completed Without Errors\n\n"
-        f"▶️ Video will be sent shortly...\n"
-    )
 
     try:
         if thumb == "/d":
