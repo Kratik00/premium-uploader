@@ -34,11 +34,8 @@ from pyrogram.errors import FloodWait
 from pyrogram.errors.exceptions.bad_request_400 import StickerEmojiInvalid
 from pyrogram.types.messages_and_media import message
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
-from premium.function import *
-from premium.plans import *
-from premium.plans_db import *
-from premium.stats import *
-from premium.usersdb import *
+from premium.function import subscribe, chk_user
+from premium import plans_db
 import aiohttp
 import aiofiles
 import zipfile
