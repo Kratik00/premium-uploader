@@ -3,7 +3,7 @@ import pytz
 import datetime, time
 from main import bot
 from vars import  PREMIUM_LOGS, OWNER_ID
-from premium import get_seconds
+from premium.function import get_seconds
 from premium import plans_db  
 from pyrogram import filters 
 from pyrogram.errors.exceptions.bad_request_400 import MessageTooLong
