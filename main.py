@@ -21,7 +21,7 @@ from logs import logging
 from bs4 import BeautifulSoup
 import saini as helper
 from utils import progress_bar
-from vars import API_ID, API_HASH, BOT_TOKEN
+from vars import API_ID, API_HASH, BOT_TOKEN, OWNER_ID, MONGO_URL
 from aiohttp import ClientSession
 from subprocess import getstatusoutput
 from pytube import YouTube
@@ -34,13 +34,18 @@ from pyrogram.errors import FloodWait
 from pyrogram.errors.exceptions.bad_request_400 import StickerEmojiInvalid
 from pyrogram.types.messages_and_media import message
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
-from premium.function import subscribe, chk_user
-from premium import plans_db
 import aiohttp
 import aiofiles
 import zipfile
 import shutil
 import ffmpeg
+import pytz, datetime
+from pymongo import MongoClient
+
+# DB INIT
+mongo = MongoClient(os.getenv("MONGO_URL"))
+premium_db = mongo["premiumbot"]["premiumbot_users"]
+
 
 # Initialize the bot
 bot = Client(
@@ -145,6 +150,23 @@ image_urls = [
     # Add more image URLs as needed
 ]
 
+async def add_premium_user(user_id:int, expire:datetime.datetime):
+    await premium_db.update_one(
+        {"_id": user_id},
+        {"$set": {"expire_date": expire}},
+        upsert=True
+    )
+
+
+async def remove_premium_user(user_id:int):
+    await premium_db.delete_one({"_id": user_id})
+
+async def check_premium_user(user_id:int):
+    return await premium_db.find_one({"_id": user_id})
+
+async def get_all_premium():
+    return premium_db.find({})
+
 @bot.on_message(filters.command("cookies") & filters.private)
 async def cookies_handler(client: Client, m: Message):
     await m.reply_text(
@@ -178,6 +200,93 @@ async def cookies_handler(client: Client, m: Message):
 
     except Exception as e:
         await m.reply_text(f"⚠️ An error occurred: {str(e)}")
+@bot.on_message(filters.command("add_premium"))
+async def add_premium_cmd(client, message):
+
+    if message.from_user.id != OWNER_ID:
+        return await message.reply("Only owner can use this.")
+
+    if len(message.command) != 3:
+        return await message.reply("Usage:\n`/add_premium user_id days`")
+
+    uid = int(message.command[1])
+    days = int(message.command[2])
+
+    expire = datetime.datetime.utcnow() + datetime.timedelta(days=days)
+
+    await add_premium_user(uid, expire)
+
+    expire_ist = expire.astimezone(pytz.timezone("Asia/Kolkata")).strftime("%d-%m-%Y %I:%M %p")
+
+    await message.reply(f"⭐ Premium given to `{uid}`\nExpires: `{expire_ist}`")
+
+    try:
+        await client.send_message(uid, f"🔥 You are now premium till {expire_ist}")
+    except:
+        pass
+
+
+
+@bot.on_message(filters.command("remove_premium"))
+async def remove_premium_cmd(client, message):
+
+    if message.from_user.id != OWNER_ID:
+        return await message.reply("Only owner can use this.")
+
+    if len(message.command) != 2:
+        return await message.reply("Usage: `/remove_premium user_id`")
+
+    uid = int(message.command[1])
+
+    await remove_premium_user(uid)
+
+    await message.reply("Removed successfully.")
+    try:
+        await client.send_message(uid, "Your premium is removed.")
+    except:
+        pass
+
+
+
+@bot.on_message(filters.command("premium_users"))
+async def premium_users_cmd(client, message):
+
+    if message.from_user.id != OWNER_ID:
+        return await message.reply("Only owner can use this.")
+
+    users = await get_all_premium()
+    text = "👑 **ACTIVE PREMIUM USERS:**\n\n"
+    c = 0
+
+    for u in users:
+        c += 1
+        exp = u["expire_date"].astimezone(pytz.timezone("Asia/Kolkata")).strftime("%d-%m-%Y %I:%M %p")
+        text += f"{c}. `{u['_id']}`\n⏳ Till: `{exp}`\n\n"
+
+    if c == 0:
+        return await message.reply("No premium users.")
+
+    await message.reply(text)
+
+
+
+@bot.on_message(filters.command("chk_premium"))
+async def chk_premium_cmd(client, message):
+
+    if len(message.command) != 2:
+        return await message.reply("Usage: `/chk_premium user_id`")
+
+    uid = int(message.command[1])
+
+    data = await check_premium_user(uid)
+
+    if not data:
+        return await message.reply("Not premium.")
+
+    exp = data["expire_date"].astimezone(pytz.timezone("Asia/Kolkata")).strftime("%d-%m-%Y %I:%M %p")
+
+    await message.reply(f"YES PREMIUM\nTill `{exp}`")
+    )
 
 @bot.on_message(filters.command(["t2t"]))
 async def text_to_txt(client, message: Message):
