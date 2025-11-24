@@ -40,12 +40,10 @@ import zipfile
 import shutil
 import ffmpeg
 import pytz, datetime
-from pymongo import MongoClient
+from motor.motor_asyncio import AsyncIOMotorClient
 
-# DB INIT
-mongo = MongoClient(os.getenv("MONGO_URL"))
+mongo = AsyncIOMotorClient(MONGO_URL)
 premium_db = mongo["premiumbot"]["premiumbot_users"]
-
 
 # Initialize the bot
 bot = Client(
