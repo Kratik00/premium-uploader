@@ -44,7 +44,7 @@ def time_formatter():
         return "0 s"
 
 
-@app.on_message(filters.command("stats") & filters.user(OWNER_ID))
+@bot.on_message(filters.command("stats") & filters.user(OWNER_ID))
 async def stats(client, message):
     start = time.time()
     users = len(await get_users())
