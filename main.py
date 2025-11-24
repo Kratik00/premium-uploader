@@ -29,6 +29,7 @@ from aiohttp import web
 import random
 from pyromod import listen
 from pyrogram import Client, filters
+from premium import function, plans_db, usersdb, plans
 from pyrogram.types import Message
 from pyrogram.errors import FloodWait
 from pyrogram.errors.exceptions.bad_request_400 import StickerEmojiInvalid
@@ -390,6 +391,13 @@ async def send_logs(client: Client, m: Message):  # Correct parameter name
 
 @bot.on_message(filters.command(["upload"]) )
 async def txt_handler(bot: Client, m: Message):
+    data = await plans_db.check_premium(m.from_user.id)
+    if not data or not data.get("expire_date"):
+        return await m.reply_text(
+            "**❌ Premium Required**\n\n"
+            "This feature is only available for premium users."
+        )
+
     editable = await m.reply_text(f"**⚡𝗦𝖾𝗇𝖽 𝗧𝗑𝗍 𝗙𝗂𝗅𝖾⚡**")
     input: Message = await bot.listen(editable.chat.id)
     y = await input.download()

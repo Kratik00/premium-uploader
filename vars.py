@@ -7,3 +7,6 @@ API_HASH  = os.environ.get("API_HASH", "06acfd441f9c3402ccdb1945e8e2a93b")
 BOT_TOKEN = os.environ.get("BOT_TOKEN", "8020293459:AAFJ12ZxbX6GHeXaBMllegCFPUforjcOKzg")
 #WEBHOOK = True  # Don't change this
 #PORT = int(os.environ.get("PORT", 8080))  # Default to 8000 if not set
+MONGO_URL = os.environ.get("MONGO_URL", "mongodb+srv://lucifer:QGPQCl6ZFf6wHiZ7@cluster0.zmcca.mongodb.net/?retryWrites=true&w=majority")
+PREMIUM_LOGS = os.environ.ger("PREMIUM_LOGS", "-1002844381920")
+OWNER_ID = os.environ.get("OWNER_ID", "7764674199")
