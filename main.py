@@ -731,7 +731,7 @@ async def txt_handler(bot: Client, m: Message):
                     print("resolve failed", url)
                     continue
                     # ⚡ FINAL redirect to your downloader API
-            url= f"https://appxplayer01-be6c71e19fb2.herokuapp.com/stream?url={real}"
+                url= f"https://appxplayer01-be6c71e19fb2.herokuapp.com/stream?url={real}"
             elif "acecwply" in url:
                 cmd = f'yt-dlp -o "{name}.%(ext)s" -f "bestvideo[height<={raw_text2}]+bestaudio" --hls-prefer-ffmpeg --no-keep-video --remux-video mkv --no-warning "{url}"'
 
