@@ -744,6 +744,7 @@ async def txt_handler(bot: Client, m: Message):
                         print("resolver MISSING url", resolved)
                         continue
 
+                    await asyncio.sleep(30)
                     url = f"https://appxplayer01-be6c71e19fb2.herokuapp.com/stream?url={real}"
 
                 except Exception as e:
