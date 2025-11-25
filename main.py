@@ -733,9 +733,9 @@ async def txt_handler(bot: Client, m: Message):
                         continue
                     try:
                         resolved = r.json()
-                        except:
-                            print("resolver returned NON-JSON", r.text[:150])
-                            continue
+                    except:
+                        print("resolver returned NON-JSON", r.text[:150])
+                        continue
                     real = resolved.get("url")
                     if not real:
                         print("resolver returned empty url", url)
