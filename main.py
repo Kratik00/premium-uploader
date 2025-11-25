@@ -1014,7 +1014,7 @@ async def txt_handler(bot: Client, m: Message):
                         time.sleep(e.x)
                         continue    
 
-                elif ".zip" in url:
+                """elif ".zip" in url:
                     try:
                         BUTTONSZIP = InlineKeyboardMarkup([[InlineKeyboardButton(text="🎥 ZIP STREAM IN PLAYER", url=f"{url}")]])
                         await bot.send_photo(chat_id=m.chat.id, photo=photozip, caption=cczip, reply_markup=BUTTONSZIP)
@@ -1023,7 +1023,7 @@ async def txt_handler(bot: Client, m: Message):
                     except FloodWait as e:
                         await m.reply_text(str(e))
                         time.sleep(e.x)
-                        continue    
+                        continue"""
 
                 elif any(ext in url.lower() for ext in [".jpg", ".jpeg", ".png", ".webp"]):
                     try:
