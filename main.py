@@ -722,35 +722,8 @@ async def txt_handler(bot: Client, m: Message):
 
             
             elif "rozgarapinew" in url:
-                try:
-                    r = requests.get(
-                        "https://player-f005d2957c8b.herokuapp.com/play",
-                        params={"url": url},
-                        timeout=20
-                    )
-
-                    if r.status_code != 200:
-                        print("resolver BAD status", r.status_code, url)
-                        continue
-
-                    if "application/json" not in r.headers.get("content-type",""):
-                        print("resolver NOT JSON", r.text[:200])
-                        continue
-
-                    resolved = r.json()
-
-                    real = resolved.get("url")
-                    if not real:
-                        print("resolver MISSING url", resolved)
-                        continue
-
-                    await asyncio.sleep(30)
-                    url = f"https://appxplayer01-be6c71e19fb2.herokuapp.com/stream?url={real}"
-
-                except Exception as e:
-                    print("resolver exception", e)
-                    continue
-            
+                url = f"https://player-f005d2957c8b.herokuapp.com/play?url={url}"
+                await asyncio.sleep(3)
             elif "acecwply" in url:
                 cmd = f'yt-dlp -o "{name}.%(ext)s" -f "bestvideo[height<={raw_text2}]+bestaudio" --hls-prefer-ffmpeg --no-keep-video --remux-video mkv --no-warning "{url}"'
 
