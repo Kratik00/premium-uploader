@@ -726,31 +726,28 @@ async def txt_handler(bot: Client, m: Message):
                     r = requests.get(
                         "https://player-f005d2957c8b.herokuapp.com/play",
                         params={"url": url},
-                        timeout=15
+                        timeout=20
                     )
-                    body = r.text.strip()
-                    if not body:
-                        print("resolver EMPTY response", url)
-                        await asyncio.sleep(3)
+
+                    if r.status_code != 200:
+                        print("resolver BAD status", r.status_code, url)
                         continue
-                    try:
-                        resolved = json.loads(body)
-                    except Exception as e:
-                        print("resolver INVALID JSON", body[:200])
-                        await asyncio.sleep(3)
+
+                    if "application/json" not in r.headers.get("content-type",""):
+                        print("resolver NOT JSON", r.text[:200])
                         continue
+
+                    resolved = r.json()
 
                     real = resolved.get("url")
                     if not real:
-                        print("resolver NO 'url' field", resolved)
-                        await asyncio.sleep(2)
+                        print("resolver MISSING url", resolved)
                         continue
 
                     url = f"https://appxplayer01-be6c71e19fb2.herokuapp.com/stream?url={real}"
 
                 except Exception as e:
                     print("resolver exception", e)
-                    await asyncio.sleep(3)
                     continue
             
             elif "acecwply" in url:
