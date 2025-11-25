@@ -728,21 +728,29 @@ async def txt_handler(bot: Client, m: Message):
                         params={"url": url},
                         timeout=15
                     )
-                    if r.status_code != 200:
-                        print("resolver HTTP BAD", r.status_code, url)
+                    body = r.text.strip()
+                    if not body:
+                        print("resolver EMPTY response", url)
+                        await asyncio.sleep(3)
                         continue
                     try:
-                        resolved = r.json()
-                    except:
-                        print("resolver returned NON-JSON", r.text[:150])
+                        resolved = json.loads(body)
+                    except Exception as e:
+                        print("resolver INVALID JSON", body[:200])
+                        await asyncio.sleep(3)
                         continue
+
                     real = resolved.get("url")
                     if not real:
-                        print("resolver returned empty url", url)
+                        print("resolver NO 'url' field", resolved)
+                        await asyncio.sleep(2)
                         continue
-                    url = f"https://appxplayer01-be6c71e19fb2.herokuapp.com/stream?url={real}"
+
+                     url = f"https://appxplayer01-be6c71e19fb2.herokuapp.com/stream?url={real}"
+
                 except Exception as e:
-                    print("resolver EXCEPTION:", e, url)
+                    print("resolver exception", e)
+                    await asyncio.sleep(3)
                     continue
             elif "acecwply" in url:
                 cmd = f'yt-dlp -o "{name}.%(ext)s" -f "bestvideo[height<={raw_text2}]+bestaudio" --hls-prefer-ffmpeg --no-keep-video --remux-video mkv --no-warning "{url}"'
