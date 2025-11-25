@@ -445,6 +445,84 @@ async def id_command(client, message: Message):
     chat_id = message.chat.id
     await message.reply_text(f"<blockquote>The ID of this chat id is:</blockquote>\n`{chat_id}`")
 
+user_files = {}  # store user uploads
+
+
+@bot.on_message(filters.command("compare") & filters.private)
+async def compare_cmd(_, m: Message):
+    user_files[m.from_user.id] = []
+    await m.reply(
+        "**📁 Send 2 TXT files.\nI will send ONLY lines that don't exist in the other file.**"
+    )
+
+
+@bot.on_message(filters.document & filters.private)
+async def handle_files(client, message: Message):
+
+    user_id = message.from_user.id
+    doc = message.document
+
+    if not doc.file_name.lower().endswith(".txt"):
+        return await message.reply("⚠️ Send only `.txt` files.")
+
+    if user_id not in user_files:
+        return await message.reply("Use /compare first.")
+
+    folder = f"downloads/{user_id}"
+    os.makedirs(folder, exist_ok=True)
+
+    # store original name
+    original_name = doc.file_name
+
+    # save as timestamp internally
+    timestamp = int(time.time() * 1000)
+    file_path = await message.download(file_name=f"{folder}/{timestamp}.txt")
+
+    user_files[user_id].append((file_path, original_name))
+
+    if len(user_files[user_id]) == 1:
+        return await message.reply("📥 First file received.\nSend second file.")
+
+    if len(user_files[user_id]) == 2:
+
+        (file1, name1), (file2, name2) = user_files[user_id]
+
+        with open(file1, "r", encoding="utf-8") as f:
+            lines1 = [l.strip() for l in f if l.strip()]
+
+        with open(file2, "r", encoding="utf-8") as f:
+            lines2 = [l.strip() for l in f if l.strip()]
+
+        diff = []
+
+        for x in lines1:
+            if x not in lines2:
+                diff.append(x)
+
+        for x in lines2:
+            if x not in lines1:
+                diff.append(x)
+
+        if not diff:
+            await message.reply("No difference found.")
+        else:
+
+            base = os.path.splitext(name1)[0]
+            out_name = f"{base}_diff.txt"
+            out_path = f"{folder}/{out_name}"
+
+            with open(out_path, "w", encoding="utf-8") as out:
+                out.write("\n".join(diff))
+
+            await message.reply_document(out_path)
+
+        # cleanup
+        try:
+            shutil.rmtree(folder)
+        except:
+            pass
+
+        user_files[user_id] = []
 @bot.on_message(filters.private & filters.command("info"))
 async def info(bot: Client, update: Message):
     
