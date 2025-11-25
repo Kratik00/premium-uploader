@@ -723,7 +723,7 @@ async def txt_handler(bot: Client, m: Message):
             
             elif "rozgarapinew" in url:
                 url = f"https://player-f005d2957c8b.herokuapp.com/play?url={url}"
-                await asyncio.sleep(2)
+                
             elif "acecwply" in url:
                 cmd = f'yt-dlp -o "{name}.%(ext)s" -f "bestvideo[height<={raw_text2}]+bestaudio" --hls-prefer-ffmpeg --no-keep-video --remux-video mkv --no-warning "{url}"'
 
@@ -892,7 +892,7 @@ async def txt_handler(bot: Client, m: Message):
             else:
                 ytf = f"b[height<={raw_text2}]/bv[height<={raw_text2}]+ba/b/bv+ba"
            
-            if "jw-prod" in url or "player" in url:
+            if "jw-prod" in url:
                 cmd = f'yt-dlp -o "{name}.mp4" "{url}"'
             elif ".m3u8.m3u8" in url or ".m3u8" in url:
             	cmd = f'yt-dlp -o "{name}.mp4" "{url}"'
