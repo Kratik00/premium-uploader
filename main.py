@@ -746,12 +746,13 @@ async def txt_handler(bot: Client, m: Message):
                         await asyncio.sleep(2)
                         continue
 
-                url = f"https://appxplayer01-be6c71e19fb2.herokuapp.com/stream?url={real}"
+                    url = f"https://appxplayer01-be6c71e19fb2.herokuapp.com/stream?url={real}"
 
                 except Exception as e:
                     print("resolver exception", e)
                     await asyncio.sleep(3)
                     continue
+            
             elif "acecwply" in url:
                 cmd = f'yt-dlp -o "{name}.%(ext)s" -f "bestvideo[height<={raw_text2}]+bestaudio" --hls-prefer-ffmpeg --no-keep-video --remux-video mkv --no-warning "{url}"'
 
