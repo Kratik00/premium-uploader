@@ -721,8 +721,17 @@ async def txt_handler(bot: Client, m: Message):
                         url = re.search(r"(https://.*?playlist.m3u8.*?)\"", text).group(1)
 
             
-            elif 'edge-cache-token' in url:
-                url = f"https://proxxy-3818edd094a6.herokuapp.com/stream?url={url}"
+            elif "rozgarapinew" in url:
+                resolved = requests.get(
+                    "https://player-f005d2957c8b.herokuapp.com/play",
+                    params={"url": url}
+                ).json()
+                real = resolved.get("url")
+                if not real:
+                    print("resolve failed", url)
+                    continue
+                    # ⚡ FINAL redirect to your downloader API
+            url= f"https://appxplayer01-be6c71e19fb2.herokuapp.com/stream?url={real}"
             elif "acecwply" in url:
                 cmd = f'yt-dlp -o "{name}.%(ext)s" -f "bestvideo[height<={raw_text2}]+bestaudio" --hls-prefer-ffmpeg --no-keep-video --remux-video mkv --no-warning "{url}"'
 
