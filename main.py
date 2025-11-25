@@ -900,7 +900,7 @@ async def txt_handler(bot: Client, m: Message):
             else:
                 ytf = f"b[height<={raw_text2}]/bv[height<={raw_text2}]+ba/b/bv+ba"
            
-            if "jw-prod" in url or "proxxy" in url:
+            if "jw-prod" in url or "appxplayer01" in url:
                 cmd = f'yt-dlp -o "{name}.mp4" "{url}"'
             elif ".m3u8.m3u8" in url or ".m3u8" in url:
             	cmd = f'yt-dlp -o "{name}.mp4" "{url}"'
