@@ -904,8 +904,8 @@ async def txt_handler(bot: Client, m: Message):
 
             if ".pdf*" in url:
                 url = f"https://dragoapi.vercel.app/pdf/{url}"
-            if ".zip" in url:
-                url = f"https://appxapi-af3062f1d56e.herokuapp.com/appx-zip?url={url}"
+           # if ".zip" in url:
+              #  url = f"https://appxapi-af3062f1d56e.herokuapp.com/appx-zip?url={url}"
                 
             elif 'encrypted.m' in url:
                 appxkey = url.split('*')[1]
