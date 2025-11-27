@@ -799,68 +799,7 @@ async def txt_handler(bot: Client, m: Message):
             elif "/khansirvod4" in url and "akamaized" in url:
                  url = url.replace(url.split("/")[-1], raw_text2+".m3u8")
  
-            """elif "https://cpvod.testbook.com/" in url:
-                url = url.replace("https://cpvod.testbook.com/", "https://media-cdn.classplusapp.com/drm/")
-                api_url = f"https://covercel.vercel.app/extract_keys?url={url}@bots_updatee&user_id={1003575883}"
-                mpd, keys = helper.get_mps_and_keys(api_url)
-                url = mpd
-                keys_string = " ".join([f"--key {key}" for key in keys])
-
-            elif "classplusapp.com/drm/" in url:
-                api_url = f"https://covercel.vercel.app/extract_keys?url={url}@bots_updatee&user_id={1003575883}"
-                mpd, keys = helper.get_mps_and_keys(api_url)
-                url = mpd
-                keys_string = " ".join([f"--key {key}" for key in keys])
-
-
-            elif any(domain in url for domain in [
-                'videos.classplusapp.com',
-                'tencdn.classplusapp.com',
-                'webvideos.classplusapp.com',
-                'media-cdn.classplusapp.com',
-                'media-cdn-alisg.classplusapp.com',
-                'media-cdn-a.classplusapp.com'
-            ]):
-                try:
-                    # ✅ Correct and updated headers
-                    headers = {
-                        'x-access-token': token_cp,
-                        'accept-language': 'en',
-                        'api-version': '52',  # ✅ Updated to latest
-                        'app-version': '1.4.71.1',  # ✅ Based on releaseVersion
-                        'build-number': '35',
-                        'connection': 'Keep-Alive',
-                        'content-type': 'application/json',
-                        'device-details': 'Xiaomi_Redmi 7_SDK-32',
-                        'device-id': 'c28d3cb16bbdac01',
-                        'region': 'IN',
-                        'user-agent': 'Mobile-Android',
-                        'accept-encoding': 'gzip'
-                    }
-
-                    # ✅ Add X-CDN-Tag if required
-                    if "media-cdn" in url:
-                        headers['X-CDN-Tag'] = 'empty'
-
-                    # 🔗 Request to JW Signed URL endpoint
-                    api = f'https://covercel.vercel.app/extract_keys?url={url}@bots_updatee&user_id={1003575883}'
-                    response = requests.get(api, headers=headers, timeout=10)
-
-                    if response.status_code == 200:
-                        signed_url = response.json().get("url")"""
-                        #if signed_url:
-                            #url = signed_url
-                        #else:
-                          #  url += "  [❌ SIGNED URL FAILED: Empty response]"
-                 #   else:
-                       # url += f"  [❌ SIGNED URL FAILED: HTTP {response.status_code}]"
-
-                #except requests.exceptions.Timeout:
-                   # url += "  [❌ SIGNED URL FAILED: Timeout]"
-               # except Exception as e:
-                   # url += f"  [❌ SIGNED URL FAILED: {str(e)}]"
-
-
+                            
             elif 'classplusapp' in url or "testbook.com" in url or "classplusapp.com/drm" in url or "media-cdn.classplusapp.com/drm" in url:
                 headers = {
                     'host': 'api.classplusapp.com',
