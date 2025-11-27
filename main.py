@@ -799,7 +799,7 @@ async def txt_handler(bot: Client, m: Message):
             elif "/khansirvod4" in url and "akamaized" in url:
                  url = url.replace(url.split("/")[-1], raw_text2+".m3u8")
  
-            elif "https://cpvod.testbook.com/" in url:
+            """elif "https://cpvod.testbook.com/" in url:
                 url = url.replace("https://cpvod.testbook.com/", "https://media-cdn.classplusapp.com/drm/")
                 api_url = f"https://covercel.vercel.app/extract_keys?url={url}@bots_updatee&user_id={1003575883}"
                 mpd, keys = helper.get_mps_and_keys(api_url)
@@ -858,8 +858,40 @@ async def txt_handler(bot: Client, m: Message):
                 except requests.exceptions.Timeout:
                     url += "  [❌ SIGNED URL FAILED: Timeout]"
                 except Exception as e:
-                    url += f"  [❌ SIGNED URL FAILED: {str(e)}]"
+                    url += f"  [❌ SIGNED URL FAILED: {str(e)}]""""
 
+
+            elif 'classplusapp' in url or "testbook.com" in url or "classplusapp.com/drm" in url or "media-cdn.classplusapp.com/drm" in url:
+                headers = {
+                    'host': 'api.classplusapp.com',
+                    'x-access-token': f'{raw_text4}',    
+                    'accept-language': 'EN',
+                    'api-version': '18',
+                    'app-version': '1.4.73.2',
+                    'build-number': '35',
+                    'connection': 'Keep-Alive',
+                    'content-type': 'application/json',
+                    'device-details': 'Xiaomi_Redmi 7_SDK-32',
+                    'device-id': 'c28d3cb16bbdac01',
+                    'region': 'IN',
+                    'user-agent': 'Mobile-Android',
+                    'webengage-luid': '00000187-6fe4-5d41-a530-26186858be4c',
+                    'accept-encoding': 'gzip'
+                }
+                
+                url = url.replace('https://tencdn.classplusapp.com/', 'https://media-cdn.classplusapp.com/tencent/')
+
+                params = {
+                    "url": f"{url}"
+                }
+
+                res = requests.get("https://api.classplusapp.com/cams/uploader/video/jw-signed-url", params=params, headers=headers).json()
+                
+                if "testbook.com" in url or "classplusapp.com/drm" in url or "media-cdn.classplusapp.com/drm" in url:
+                    url = res['drmUrls']['manifestUrl']
+                    
+                else:
+                    url = res["url"]
 
             elif "childId" in url and "parentId" in url:
                 url = f"https://anonymouspwplayer-0e5a3f512dec.herokuapp.com/pw?url={url}&token={raw_text4}"
