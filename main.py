@@ -847,18 +847,18 @@ async def txt_handler(bot: Client, m: Message):
                     response = requests.get(api, headers=headers, timeout=10)
 
                     if response.status_code == 200:
-                        signed_url = response.json().get("url")
-                        if signed_url:
-                            url = signed_url
-                        else:
-                            url += "  [❌ SIGNED URL FAILED: Empty response]"
-                    else:
-                        url += f"  [❌ SIGNED URL FAILED: HTTP {response.status_code}]"
+                        signed_url = response.json().get("url")"""
+                        #if signed_url:
+                            #url = signed_url
+                        #else:
+                          #  url += "  [❌ SIGNED URL FAILED: Empty response]"
+                 #   else:
+                       # url += f"  [❌ SIGNED URL FAILED: HTTP {response.status_code}]"
 
-                except requests.exceptions.Timeout:
-                    url += "  [❌ SIGNED URL FAILED: Timeout]"
-                except Exception as e:
-                    url += f"  [❌ SIGNED URL FAILED: {str(e)}]""""
+                #except requests.exceptions.Timeout:
+                   # url += "  [❌ SIGNED URL FAILED: Timeout]"
+               # except Exception as e:
+                   # url += f"  [❌ SIGNED URL FAILED: {str(e)}]"
 
 
             elif 'classplusapp' in url or "testbook.com" in url or "classplusapp.com/drm" in url or "media-cdn.classplusapp.com/drm" in url:
