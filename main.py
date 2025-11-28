@@ -800,10 +800,17 @@ async def txt_handler(bot: Client, m: Message):
                  url = url.replace(url.split("/")[-1], raw_text2+".m3u8")
  
                             
-            elif 'classplusapp' in url or "testbook.com" in url or "classplusapp.com/drm" in url or "media-cdn.classplusapp.com/drm" in url:
+            elif any(x in url for x in [
+                "classplusapp", 
+                "testbook.com", 
+                "classplusapp.com/drm", 
+                "media-cdn.classplusapp.com/drm"
+            ]):
+                original_url = url  # keep original for DRM check
+
                 headers = {
                     'host': 'api.classplusapp.com',
-                    'x-access-token': f'{raw_text4}',    
+                    'x-access-token': working_token,
                     'accept-language': 'EN',
                     'api-version': '18',
                     'app-version': '1.4.73.2',
@@ -817,18 +824,29 @@ async def txt_handler(bot: Client, m: Message):
                     'webengage-luid': '00000187-6fe4-5d41-a530-26186858be4c',
                     'accept-encoding': 'gzip'
                 }
-                
-                url = url.replace('https://tencdn.classplusapp.com/', 'https://media-cdn.classplusapp.com/tencent/')
 
-                params = {
-                    "url": f"{url}"
-                }
+    # replace only if it's tencdn link
+                if "tencdn.classplusapp.com" in url:
+                    url = url.replace(
+                        "https://tencdn.classplusapp.com/",
+                        "https://media-cdn.classplusapp.com/tencent/"
+                    )
 
-                res = requests.get("https://api.classplusapp.com/cams/uploader/video/jw-signed-url", params=params, headers=headers).json()
-                
-                if "testbook.com" in url or "classplusapp.com/drm" in url or "media-cdn.classplusapp.com/drm" in url:
-                    url = res['drmUrls']['manifestUrl']
-                    
+                params = {"url": url}
+
+                res = requests.get(
+                    "https://api.classplusapp.com/cams/uploader/video/jw-signed-url",
+                    params=params,
+                    headers=headers
+                ).json()
+
+    # DRM or NON-DRM?
+                if any(x in original_url for x in [
+                    "testbook.com",
+                    "classplusapp.com/drm",
+                    "media-cdn.classplusapp.com/drm"
+                ]):
+                    url = res["drmUrls"]["manifestUrl"]
                 else:
                     url = res["url"]
 
