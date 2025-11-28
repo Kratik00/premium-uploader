@@ -800,56 +800,10 @@ async def txt_handler(bot: Client, m: Message):
                  url = url.replace(url.split("/")[-1], raw_text2+".m3u8")
  
                             
-            elif any(x in url for x in [
-                "classplusapp", 
-                "testbook.com", 
-                "classplusapp.com/drm", 
-                "media-cdn.classplusapp.com/drm"
-            ]):
-                original_url = url  # keep original for DRM check
+            elif "classplus" in url:
+                url = f"https://www.masterapi.tech/redirect/cp/dl?url={url}"
 
-                headers = {
-                    'host': 'api.classplusapp.com',
-                    'x-access-token': {raw_text4},
-                    'accept-language': 'EN',
-                    'api-version': '18',
-                    'app-version': '1.4.73.2',
-                    'build-number': '35',
-                    'connection': 'Keep-Alive',
-                    'content-type': 'application/json',
-                    'device-details': 'Xiaomi_Redmi 7_SDK-32',
-                    'device-id': 'c28d3cb16bbdac01',
-                    'region': 'IN',
-                    'user-agent': 'Mobile-Android',
-                    'webengage-luid': '00000187-6fe4-5d41-a530-26186858be4c',
-                    'accept-encoding': 'gzip'
-                }
-
-    # replace only if it's tencdn link
-                if "tencdn.classplusapp.com" in url:
-                    url = url.replace(
-                        "https://tencdn.classplusapp.com/",
-                        "https://media-cdn.classplusapp.com/tencent/"
-                    )
-
-                params = {"url": url}
-
-                res = requests.get(
-                    "https://api.classplusapp.com/cams/uploader/video/jw-signed-url",
-                    params=params,
-                    headers=headers
-                ).json()
-
-    # DRM or NON-DRM?
-                if any(x in original_url for x in [
-                    "testbook.com",
-                    "classplusapp.com/drm",
-                    "media-cdn.classplusapp.com/drm"
-                ]):
-                    url = res["drmUrls"]["manifestUrl"]
-                else:
-                    url = res["url"]
-
+            
             elif "childId" in url and "parentId" in url:
                 url = f"https://anonymouspwplayer-0e5a3f512dec.herokuapp.com/pw?url={url}&token={raw_text4}"
                            
