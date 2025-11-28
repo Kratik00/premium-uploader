@@ -71,12 +71,12 @@ def duration(filename):
         stderr=subprocess.STDOUT)
     return float(result.stdout)
 
-def get_mps_and_keys(api_url):
-    response = requests.get(api_url)
-    response_json = response.json()
-    mpd = response_json.get('MPD')
-    keys = response_json.get('KEYS')
-    return mpd, keys
+#def get_mps_and_keys(api_url):
+    #response = requests.get(api_url)
+   # response_json = response.json()
+   # mpd = response_json.get('MPD')
+   # keys = response_json.get('KEYS')
+   # return mpd, keys
    
 def exec(cmd):
         process = subprocess.run(cmd, stdout=subprocess.PIPE,stderr=subprocess.PIPE)
