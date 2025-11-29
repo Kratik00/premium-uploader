@@ -270,34 +270,48 @@ def time_name():
     return f"{date} {current_time}.mp4"
 
 
-async def download_video(url,cmd, name):
-    download_cmd = f'{cmd} -R 25 --fragment-retries 25 --external-downloader aria2c --downloader-args "aria2c: -x 16 -j 32"'
+async def download_video(url, cmd, name):
     global failed_counter
+
+    # 💎 safest low-RAM downloader
+    download_cmd = (
+        f'{cmd} --hls-prefer-native --no-merge-files '
+        f'-R 25 --fragment-retries 25 '
+        f'--external-downloader aria2c '
+        f'--downloader-args "aria2c:-x 16 -j 32 -s 16" '
+        f'-o "{name}.mp4"'
+    )
+
     print(download_cmd)
     logging.info(download_cmd)
+
+    # run safely
     k = subprocess.run(download_cmd, shell=True)
+
+    # retry only for visionias
     if "visionias" in cmd and k.returncode != 0 and failed_counter <= 10:
         failed_counter += 1
         await asyncio.sleep(5)
-        await download_video(url, cmd, name)
+        return await download_video(url, cmd, name)
+
     failed_counter = 0
-    try:
-        if os.path.isfile(name):
-            return name
-        elif os.path.isfile(f"{name}.webm"):
-            return f"{name}.webm"
-        name = name.split(".")[0]
-        if os.path.isfile(f"{name}.mkv"):
-            return f"{name}.mkv"
-        elif os.path.isfile(f"{name}.mp4"):
-            return f"{name}.mp4"
-        elif os.path.isfile(f"{name}.mp4.webm"):
-            return f"{name}.mp4.webm"
 
-        return name
-    except FileNotFoundError as exc:
-        return os.path.isfile.splitext[0] + "." + "mp4"
+    # ----- FILE DETECTION FIX (REAL PATH) -----
 
+    # check mp4 first (we force mp4 output)
+    if os.path.exists(f"{name}.mp4"):
+        return f"{name}.mp4"
+
+    # fallback mkv
+    if os.path.exists(f"{name}.mkv"):
+        return f"{name}.mkv"
+
+    # fallback webm
+    if os.path.exists(f"{name}.webm"):
+        return f"{name}.webm"
+
+    # if nothing found, return name only
+    return name
 
 async def send_doc(bot: Client, m: Message, cc, ka, cc1, prog, count, name):
     await prog.delete()
