@@ -818,7 +818,7 @@ async def txt_handler(bot: Client, m: Message):
                     continue
                 if "master.m3u8" in url:
                     try:
-                        api = f"https://classplus-a5b66556381b.herokuapp.com/resolve?url={url}"
+                        api = f"https://luciferapi-28bd7412e140.herokuapp.com/resolve?url={url}"
                         data = requests.get(api).json()
                         if data.get("success") and data.get("final_url"):
                             url = data["final_url"]   # 🚀 overwrite url with final playable link
