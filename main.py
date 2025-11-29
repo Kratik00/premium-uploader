@@ -801,8 +801,30 @@ async def txt_handler(bot: Client, m: Message):
  
                             
             elif "classplus" in url:
-                url = f"https://www.masterapi.tech/redirect/cp/dl?url={url}"
-
+                is_drm = (
+                    "/drm/" in url
+                    or "classplusapp.com/drm" in url
+                    or "media-cdn.classplusapp.com/drm" in url
+                )
+                if is_drm:
+                    await message.reply_photo(
+                        photo="https://graph.org/file/0b988a4a0e9dd4647026b-ffabe40b6085866928.jpg",
+                        caption="❌ Can't download because of security purpose (DRM Protected)",
+                        reply_markup=InlineKeyboardMarkup(
+                            [[InlineKeyboardButton("🔗 Open Original Link", url=url)]]
+                        ),
+                    )
+        # Continue loop — skip download, move to next link
+                    continue
+                if "master.m3u8" in url:
+                    try:
+                        api = f"https://classplus-a5b66556381b.herokuapp.com/resolve?url={url}"
+                        data = requests.get(api).json()
+                        if data.get("success") and data.get("final_url"):
+                            url = data["final_url"]   # 🚀 overwrite url with final playable link
+                    except Exception as e:
+                        print("Resolver Error:", e)
+            # fallback → keep original url
             
             elif "childId" in url and "parentId" in url:
                 url = f"https://anonymouspwplayer-0e5a3f512dec.herokuapp.com/pw?url={url}&token={raw_text4}"
