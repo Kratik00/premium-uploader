@@ -801,30 +801,74 @@ async def txt_handler(bot: Client, m: Message):
  
                             
             elif "classplus" in url:
-                is_drm = (
-                    "/drm/" in url
-                    or "classplusapp.com/drm" in url
-                    or "media-cdn.classplusapp.com/drm" in url
-                )
-                if is_drm:
-                    await message.reply_photo(
-                        photo="https://graph.org/file/0b988a4a0e9dd4647026b-ffabe40b6085866928.jpg",
-                        caption="❌ Can't download because of security purpose (DRM Protected)",
-                        reply_markup=InlineKeyboardMarkup(
-                            [[InlineKeyboardButton("🔗 Open Original Link", url=url)]]
-                        ),
+                advanced_drm = "drm" in url
+                if advanced_drm:
+                    print("🔥 Classplus DRM detected")
+                    url_norm = url.replace(
+                        "https://cpvod.testbook.com/",
+                        "https://media-cdn.classplusapp.com/drm/",
                     )
-        # Continue loop — skip download, move to next link
-                    continue
+
+                    api_url = (
+                        f"https://itsgolu-cp-api.vercel.app/itsgolu?"
+                        f"url={url}@ITSGOLU_OFFICIAL&user_id=8160506213"
+                    )
+
+                    mpd = None
+                    keys_string = ""
+
+                    try:
+                        resp = requests.get(api_url, timeout=30)
+                        data = resp.json()
+
+                        if isinstance(data, dict) and "KEYS" in data and "MPD" in data:
+                            mpd = data.get("MPD")
+                            keys = data.get("KEYS", [])
+                            url = mpd
+                            keys_string = " ".join([f"--key {k}" for k in keys])
+                            print(f"✅ DRM Keys Found: {len(keys)}")
+
+                        elif isinstance(data, dict) and "url" in data:
+                            url = data.get("url")
+                            keys_string = ""
+                            print("✅ Non-DRM Direct URL Found")
+
+                        else:
+                            await message.reply_text(
+                                "⚠️ Unexpected DRM response. Trying fallback..."
+                            )
+                            try:
+                                res = helper.get_mps_and_keys2(url_norm)
+                                if res:
+                                    mpd, keys = res
+                                    url = mpd
+                                    keys_string = " ".join([f"--key {k}" for k in keys])
+                                    print("🔁 Fallback success")
+                               else:
+                                    print("⚠️ Fallback empty")
+                            except Exception as e_f:
+                                print(f"Fallback error: {e_f}")
+
+                    except Exception as e:
+                        print("ITSGOLU API Error:", e)
+                        await message.reply_photo(
+                            photo="https://graph.org/file/0b988a4a0e9dd4647026b-ffabe40b6085866928.jpg",
+                            caption="❌ DRM fetch failed due to security restriction.",
+                        )
+                        continue
+
+                   continue
+
+    # master.m3u8 resolver
                 if "master.m3u8" in url:
                     try:
                         api = f"https://luciferapi-28bd7412e140.herokuapp.com/resolve?url={url}"
                         data = requests.get(api).json()
                         if data.get("success") and data.get("final_url"):
-                            url = data["final_url"]   # 🚀 overwrite url with final playable link
+                            url = data["final_url"]
+                            print("🎯 Resolved playable URL")
                     except Exception as e:
                         print("Resolver Error:", e)
-            # fallback → keep original url
             
             elif "childId" in url and "parentId" in url:
                 url = f"https://anonymouspwplayer-25261acd1521.herokuapp.com/pw?url={url}&token={raw_text4}"
