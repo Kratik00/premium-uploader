@@ -43,6 +43,21 @@ def split_name_enc_url(line):
         return name, enc_url
     return line.strip(), None  # Agar encrypted URL nahi mila, to pura line name maan lo
 
+def get_mps_and_keys2(api_url):
+    try:
+        response = requests.get(api_url, timeout=10)
+        response.raise_for_status()  # Raises exception for 4xx/5xx status codes
+        response_json = response.json()
+        mpd = response_json.get('mpd_url')
+        keys = response_json.get('keys')
+        return mpd, keys
+    except RequestException as e:
+        print(f"Request failed: {e}")
+        return None, None
+    except ValueError as e:
+        print(f"JSON decode error: {e}")
+        return None, None
+
 # Function to decrypt file URLs
 def decrypt_file_txt(input_file):
     output_file = "decrypted_" + input_file  # Output file ka naam
