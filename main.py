@@ -857,7 +857,7 @@ async def txt_handler(bot: Client, m: Message):
                         )
                         continue
 
-                   continue
+                    continue
 
     # master.m3u8 resolver
                 if "master.m3u8" in url:
