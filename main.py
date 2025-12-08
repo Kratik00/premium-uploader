@@ -844,7 +844,7 @@ async def txt_handler(bot: Client, m: Message):
                                     url = mpd
                                     keys_string = " ".join([f"--key {k}" for k in keys])
                                     print("🔁 Fallback success")
-                               else:
+                                else:
                                     print("⚠️ Fallback empty")
                             except Exception as e_f:
                                 print(f"Fallback error: {e_f}")
