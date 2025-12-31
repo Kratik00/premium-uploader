@@ -1093,7 +1093,7 @@ async def txt_handler(bot: Client, m: Message):
                     await asyncio.sleep(1)  
                     continue  
 
-                elif 'drmcdni' in url or 'drm/wv' in url:
+                elif 'drmcdni' in url or 'drm/wv' in url or 'drm/common' in url:
                     remaining_links = len(links) - count
                     progress = (count / len(links)) * 100
                     sticker_message = await show_random_sticker(message)
