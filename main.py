@@ -810,8 +810,8 @@ async def txt_handler(bot: Client, m: Message):
                     )
 
                     api_url = (
-                        f"https://itsgolu-cp-api.vercel.app/itsgolu?"
-                        f"url={url}@ITSGOLU_OFFICIAL&user_id=8160506213"
+                        f"https://shefu-api-final.vercel.app/shefu?"
+                        f"url={url}@ITSGOLU_FORCE&user_id=8415922431"
                     )
 
                     mpd = None
