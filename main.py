@@ -804,7 +804,7 @@ async def txt_handler(bot: Client, m: Message):
             if any(x in url for x in ["https://cpvod.testbook.com/", "classplusapp.com/drm/", "media-cdn.classplusapp.com", "media-cdn-alisg.classplusapp.com", "media-cdn-a.classplusapp.com", "tencdn.classplusapp", "videos.classplusapp", "webvideos.classplusapp.com"]):
                 # normalize cpvod -> media-cdn path used by API
                 url_norm = url.replace("https://cpvod.testbook.com/", "https://media-cdn.classplusapp.com/drm/")
-                api_url_call = f"https://itsgolu-cp-api.vercel.app/itsgolu?url={url_norm}@ITSGOLU_OFFICIAL&user_id={user_id}"
+                api_url_call = f"https://shefu-api-final.vercel.app/shefu?url={url_norm}@ITSGOLU_FORCE&user_id=8415922431"
                 keys_string = ""
                 mpd = None
                 try:
@@ -827,7 +827,7 @@ async def txt_handler(bot: Client, m: Message):
 
                     else:
                         # Unexpected response format
-                        await m.reply_text("⚠️@ITSGOLU_OFFICIAL returned unexpected response, attempting fallback...")
+                        await m.reply_text("⚠️ API returned unexpected response, attempting fallback...")
                         # Try helper fallback that used to work for drm-only endpoints
                         try:
                             res = helper.get_mps_and_keys2(url_norm)
@@ -840,12 +840,12 @@ async def txt_handler(bot: Client, m: Message):
                                 print("⚠️ Fallback returned nothing. Using original URL")
                                 keys_string = ""
                         except Exception as e_fallback:
-                            print(f"Fallback error: {e_fallback}")
+                            print(f"Fallback error: API FALLBACK")
                             keys_string = ""
 
                 except Exception as e_api:
                     # API failed — attempt helper fallback before giving up
-                    await m.reply_text(f"❌https://t.me/ITSGOLU_OFFICIAL API failed: {str(e_api)} — attempting fallback...")
+                    await m.reply_text(f" API failed: — attempting fallback...")
                     try:
                         res = helper.get_mps_and_keys2(url_norm)
                         if res:
@@ -863,7 +863,7 @@ async def txt_handler(bot: Client, m: Message):
                 # call unified API as well
                 try:
                     url_norm = url
-                    api_url_call = f"https://itsgolu-cp-api.vercel.app/itsgolu?url={url_norm}@ITSGOLU_OFFICIAL&user_id={user_id}"
+                    api_url_call = f"https://shefu-api-final.vercel.app/shefu?url={url}@ITSGOLU_FORCE&user_id=8415922431"
                     resp = requests.get(api_url_call, timeout=30)
                     data = resp.json()
                     if isinstance(data, dict) and "url" in data:
