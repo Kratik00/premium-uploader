@@ -799,58 +799,84 @@ async def txt_handler(bot: Client, m: Message):
             elif "/khansirvod4" in url and "akamaized" in url:
                  url = url.replace(url.split("/")[-1], raw_text2+".m3u8")
  
-                            
-            elif "classplus" in url:
-                advanced_drm = "drm" in url
-                if advanced_drm:
-                    print("🔥 Classplus DRM detected")
-                    url_norm = url.replace(
-                        "https://cpvod.testbook.com/",
-                        "https://media-cdn.classplusapp.com/drm/",
-                    )
 
-                    api_url = (
-                        f"https://shefu-api-final.vercel.app/shefu?"
-                        f"url={url}@ITSGOLU_FORCE&user_id=8415922431"
-                    )
+# --- Unified Classplus/Testbook handler using ITSGOLU API ---
+            if any(x in url for x in ["https://cpvod.testbook.com/", "classplusapp.com/drm/", "media-cdn.classplusapp.com", "media-cdn-alisg.classplusapp.com", "media-cdn-a.classplusapp.com", "tencdn.classplusapp", "videos.classplusapp", "webvideos.classplusapp.com"]):
+                # normalize cpvod -> media-cdn path used by API
+                url_norm = url.replace("https://cpvod.testbook.com/", "https://media-cdn.classplusapp.com/drm/")
+                api_url_call = f"https://itsgolu-cp-api.vercel.app/itsgolu?url={url_norm}@ITSGOLU_OFFICIAL&user_id={user_id}"
+                keys_string = ""
+                mpd = None
+                try:
+                    resp = requests.get(api_url_call, timeout=30)
+                    data = resp.json()
 
-                    mpd = None
-                    keys_string = ""
+                    # DRM response (MPD + KEYS)
+                    if isinstance(data, dict) and "KEYS" in data and "MPD" in data:
+                        mpd = data.get("MPD")
+                        keys = data.get("KEYS", [])
+                        url = mpd
+                        keys_string = " ".join([f"--key {k}" for k in keys])
+                        print(f"✅ DRM Content - Got {len(keys)} keys")
 
+                    # Non-DRM response (direct url)
+                    elif isinstance(data, dict) and "url" in data:
+                        url = data.get("url")
+                        keys_string = ""
+                        print("✅ Non-DRM Content - Got direct URL")
+
+                    else:
+                        # Unexpected response format
+                        await m.reply_text("⚠️@ITSGOLU_OFFICIAL returned unexpected response, attempting fallback...")
+                        # Try helper fallback that used to work for drm-only endpoints
+                        try:
+                            res = helper.get_mps_and_keys2(url_norm)
+                            if res:
+                                mpd, keys = res
+                                url = mpd
+                                keys_string = " ".join([f"--key {k}" for k in keys])
+                                print("🔁 Fallback succeeded via helper.get_mps_and_keys2")
+                            else:
+                                print("⚠️ Fallback returned nothing. Using original URL")
+                                keys_string = ""
+                        except Exception as e_fallback:
+                            print(f"Fallback error: {e_fallback}")
+                            keys_string = ""
+
+                except Exception as e_api:
+                    # API failed — attempt helper fallback before giving up
+                    await m.reply_text(f"❌https://t.me/ITSGOLU_OFFICIAL API failed: {str(e_api)} — attempting fallback...")
                     try:
-                        resp = requests.get(api_url, timeout=30)
-                        data = resp.json()
-
-                        if isinstance(data, dict) and "KEYS" in data and "MPD" in data:
-                            mpd = data.get("MPD")
-                            keys = data.get("KEYS", [])
+                        res = helper.get_mps_and_keys2(url_norm)
+                        if res:
+                            mpd, keys = res
                             url = mpd
                             keys_string = " ".join([f"--key {k}" for k in keys])
-                            print(f"✅ DRM Keys Found: {len(keys)}")
-
-                        elif isinstance(data, dict) and "url" in data:
-                            url = data.get("url")
-                            keys_string = ""
-                            print("✅ Non-DRM Direct URL Found")
-
+                            print("🔁 Fallback succeeded via helper.get_mps_and_keys2")
                         else:
-                            await message.reply_text(
-                                "⚠️ Unexpected DRM response. Trying fallback..."
-                            )
-                            try:
-                                res = helper.get_mps_and_keys2(url_norm)
-                                if res:
-                                    mpd, keys = res
-                                    url = mpd
-                                    keys_string = " ".join([f"--key {k}" for k in keys])
-                                    print("🔁 Fallback success")
-                                else:
-                                    print("⚠️ Fallback empty")
-                            except Exception as e_f:
-                                print(f"Fallback error: {e_f}")
-
-                    
-            
+                            print("⚠️ Fallback returned nothing. Using original URL")
+                            keys_string = ""
+                    except Exception as e_fallback:
+                        print(f"Fallback error: {e_fallback}")
+                        keys_string = ""
+            elif 'videos.classplusapp' in url or "tencdn.classplusapp" in url or "webvideos.classplusapp.com" in url:
+                # call unified API as well
+                try:
+                    url_norm = url
+                    api_url_call = f"https://itsgolu-cp-api.vercel.app/itsgolu?url={url_norm}@ITSGOLU_OFFICIAL&user_id={user_id}"
+                    resp = requests.get(api_url_call, timeout=30)
+                    data = resp.json()
+                    if isinstance(data, dict) and "url" in data:
+                        url = data.get('url')
+                        keys_string = ""
+                    elif isinstance(data, dict) and "MPD" in data and "KEYS" in data:
+                        mpd = data.get('MPD')
+                        keys = data.get('KEYS', [])
+                        url = mpd
+                        keys_string = " ".join([f"--key {k}" for k in keys])
+                except Exception:
+                    # leave url as-is
+                    keys_string = ""
             elif "childId" in url and "parentId" in url:
                 url = f"https://anonymouspwplayer-25261acd1521.herokuapp.com/pw?url={url}&token={raw_text4}"
                            
