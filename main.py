@@ -849,26 +849,7 @@ async def txt_handler(bot: Client, m: Message):
                             except Exception as e_f:
                                 print(f"Fallback error: {e_f}")
 
-                    except Exception as e:
-                        print("ITSGOLU API Error:", e)
-                        await message.reply_photo(
-                            photo="https://graph.org/file/0b988a4a0e9dd4647026b-ffabe40b6085866928.jpg",
-                            caption="❌ DRM fetch failed due to security restriction.",
-                        )
-                        continue
-
-                    continue
-
-    # master.m3u8 resolver
-                if "master.m3u8" in url:
-                    try:
-                        api = f"https://luciferapi-28bd7412e140.herokuapp.com/resolve?url={url}"
-                        data = requests.get(api).json()
-                        if data.get("success") and data.get("final_url"):
-                            url = data["final_url"]
-                            print("🎯 Resolved playable URL")
-                    except Exception as e:
-                        print("Resolver Error:", e)
+                    
             
             elif "childId" in url and "parentId" in url:
                 url = f"https://anonymouspwplayer-25261acd1521.herokuapp.com/pw?url={url}&token={raw_text4}"
