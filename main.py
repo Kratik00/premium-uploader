@@ -896,16 +896,19 @@ async def txt_handler(bot: Client, m: Message):
                 url = f"https://anonymouspwplayer-25261acd1521.herokuapp.com/pw?url={url}&token={raw_text4}"
                            
             elif "masterapi.tech" in url:
-                response = requests.get(url, timeout=15)
-                data = safe_json(response)
-                if not data:
-                    raise ValueError("Non-json from masterapi")
-                link = data.get("link")
-                if not link: 
-                    raise ValueError("No link found")
-                url = f"https://appxplayer01-be6c71e19fb2.herokuapp.com/stream?url={link}"
+                try:
+                    response = requests.get(url, timeout=15)
+                    data = safe_json(response)
+                    link = data.get("link")
+                    if "signature" in link:
+                        url = f"https://appxplayer01-be6c71e19fb2.herokuapp.com/stream?url={link}"
+                    else:
+                        link = url
+                except Exception:
+                    url = url
             
-            
+            elif "TYPE=0.00" in url:
+                url = url.split("@", 1)[0]
             elif "d1d34p8vz63oiq" in url or "sec1.pw.live" in url:
                 url = f"https://anonymouspwplayer-25261acd1521.herokuapp.com/pw?url={url}&token={raw_text4}"
                 #url =  f"{api_url}pw-dl?url={url}&token={raw_text4}&authorization={api_token}&q={raw_text2}"
