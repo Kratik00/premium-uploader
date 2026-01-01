@@ -887,7 +887,7 @@ async def txt_handler(bot: Client, m: Message):
                 link = data.get("link")
                 if not link: 
                     raise ValueError("No link found")
-                url = f"https://appxplayer01-be6c71e19fb2.herokuapp.com/stream?url={url}"
+                url = f"https://appxplayer01-be6c71e19fb2.herokuapp.com/stream?url={link}"
             
             
             elif "d1d34p8vz63oiq" in url or "sec1.pw.live" in url:
