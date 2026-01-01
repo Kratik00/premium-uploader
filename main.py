@@ -880,6 +880,16 @@ async def txt_handler(bot: Client, m: Message):
             elif "childId" in url and "parentId" in url:
                 url = f"https://anonymouspwplayer-25261acd1521.herokuapp.com/pw?url={url}&token={raw_text4}"
                            
+            elif "masterapi.tech" in url:
+                data = safe_json(response)
+                if not data:
+                    raise ValueError("Non-json from masterapi")
+                link = data.get("link")
+                if not link: 
+                    raise ValueError("No link found")
+                url = f"https://appxplayer01-be6c71e19fb2.herokuapp.com/stream?url={url}"
+            
+            
             elif "d1d34p8vz63oiq" in url or "sec1.pw.live" in url:
                 url = f"https://anonymouspwplayer-25261acd1521.herokuapp.com/pw?url={url}&token={raw_text4}"
                 #url =  f"{api_url}pw-dl?url={url}&token={raw_text4}&authorization={api_token}&q={raw_text2}"
@@ -891,6 +901,7 @@ async def txt_handler(bot: Client, m: Message):
                 #policy = requests.post('https://api.penpencil.xyz/v1/files/get-signed-cookie', headers=headers, json={'url': f"https://d1d34p8vz63oiq.cloudfront.net/" + id + "/master.mpd"}).json()['data']
                 #url = "https://sr-get-video-quality.selav29696.workers.dev/?Vurl=" + "https://d1d34p8vz63oiq.cloudfront.net/" + id + f"/hls/{raw_text2}/main.m3u8" + policy
                 #print(url)
+
 
             if ".pdf*" in url:
                 url = f"https://dragoapi.vercel.app/pdf/{url}"
