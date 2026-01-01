@@ -573,6 +573,21 @@ async def send_logs(client: Client, m: Message):  # Correct parameter name
     except Exception as e:
         await m.reply_text(f"Error sending logs: {e}")
 
+def safe_json(response):
+    try:
+        if response is None:
+            return None
+
+        if response.status_code != 200:
+            return None
+
+        text = response.text.strip()
+        if not text or not text.startswith("{"):
+            return None
+
+        return response.json()
+    except Exception:
+        return None
 @bot.on_message(filters.command(["upload"]) )
 async def txt_handler(bot: Client, m: Message):
     data = await check_premium_user(m.from_user.id)
