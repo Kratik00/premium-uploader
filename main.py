@@ -896,6 +896,7 @@ async def txt_handler(bot: Client, m: Message):
                 url = f"https://anonymouspwplayer-25261acd1521.herokuapp.com/pw?url={url}&token={raw_text4}"
                            
             elif "masterapi.tech" in url:
+                response = requests.get(url, timeout=15)
                 data = safe_json(response)
                 if not data:
                     raise ValueError("Non-json from masterapi")
