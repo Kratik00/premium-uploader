@@ -901,7 +901,7 @@ async def txt_handler(bot: Client, m: Message):
                     data = safe_json(response)
                     link = data.get("link")
                     if "signature" in link:
-                        url = f"https://appxplayer01-be6c71e19fb2.herokuapp.com/stream?url={link}"
+                        url = f"https://appx-player-61eecf1609e9.herokuapp.com/stream?url={link}"
                     else:
                         link = url
                 except Exception:
