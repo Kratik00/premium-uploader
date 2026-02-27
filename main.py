@@ -186,9 +186,10 @@ async def is_premium_user(user_id: int) -> bool:
     if not expire_date:
         return False
 
-    # Expiry check
-    if expire_date < datetime.now(timezone.utc):
-        # Auto remove expired user
+    # 🔥 Convert both to naive UTC
+    now = datetime.utcnow()
+
+    if expire_date.replace(tzinfo=None) < now:
         await premium_db.delete_one({"_id": user_id})
         return False
 
