@@ -316,7 +316,7 @@ async def download_video(url,cmd, name):
 async def send_doc(bot: Client, m: Message, file_path, caption):
 
     try:
-        await m.reply_document(
+        sent = await m.reply_document(
             file_path,
             caption=caption
         )
@@ -324,6 +324,8 @@ async def send_doc(bot: Client, m: Message, file_path, caption):
     finally:
         if os.path.exists(file_path):
             os.remove(file_path)
+
+    return sent
 
 def decrypt_file(file_path, key):  
     if not os.path.exists(file_path): 
@@ -367,7 +369,7 @@ async def send_vid(bot: Client, m: Message, cc, filename, name):
         dur = None
 
     try:
-        await m.reply_video(
+        sent = await m.reply_video(
             filename,
             caption=cc,
             supports_streaming=True,
@@ -377,7 +379,7 @@ async def send_vid(bot: Client, m: Message, cc, filename, name):
 
     except Exception:
         # fallback if video fails
-        await m.reply_document(
+        sent = await m.reply_document(
             filename,
             caption=cc
         )
@@ -388,3 +390,5 @@ async def send_vid(bot: Client, m: Message, cc, filename, name):
 
         if thumbnail and os.path.exists(thumbnail):
             os.remove(thumbnail)
+
+    return sent
