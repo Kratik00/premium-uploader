@@ -348,20 +348,27 @@ async def download_and_decrypt_video(url, cmd, name, key):
             print(f"Failed to decrypt {video_path}.")  
             return None  
 
-async def send_vid(bot: Client, m: Message, cc, filename, name):
+async def send_vid(bot: Client, m: Message, cc, filename, thumb, name):
 
     try:
         dur = int(duration(filename))
+    except:
+        dur = None
 
+    # If thumb is invalid or None, force None
+    
+    thumb = None
+
+    try:
         await m.reply_video(
             filename,
             caption=cc,
             supports_streaming=True,
-            duration=dur
+            duration=dur,
+            thumb=thumb  # 🔥 can be None safely
         )
 
     except Exception:
-        # fallback to document if video fails
         await m.reply_document(
             filename,
             caption=cc
