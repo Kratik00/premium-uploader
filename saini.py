@@ -313,26 +313,17 @@ async def download_video(url,cmd, name):
     except FileNotFoundError as exc:
         return os.path.isfile.splitext[0] + "." + "mp4"
 
-async def send_doc(bot: Client, m: Message, cc, ka, cc1, prog, count, name):
-    await prog.delete()
+async def send_doc(bot: Client, m: Message, file_path, caption):
 
-    reply = await m.reply_text(
-        f"**📦 Document is being processed**\n\n"
-        f"**📄 Title »** `{name}`\n\n"
-        f"**Status: Processing complete.**\n"
-        f"**Preparing file for delivery…**\n\n"
-        f"**— System Notification - @noobhusir**"
-    )
+    try:
+        await m.reply_document(
+            file_path,
+            caption=caption
+        )
 
-    time.sleep(1)
-    start_time = time.time()
-    await bot.send_document(ka, caption=cc1)
-    count+=1
-    await reply.delete (True)
-    time.sleep(1)
-    os.remove(ka)
-    time.sleep(3) 
-
+    finally:
+        if os.path.exists(file_path):
+            os.remove(file_path)
 
 def decrypt_file(file_path, key):  
     if not os.path.exists(file_path): 
@@ -357,39 +348,25 @@ async def download_and_decrypt_video(url, cmd, name, key):
             print(f"Failed to decrypt {video_path}.")  
             return None  
 
-async def send_vid(bot: Client, m: Message, cc, filename, thumb, name, prog):
-    subprocess.run(f'ffmpeg -i "{filename}" -ss 00:00:10 -vframes 1 "{filename}.jpg"', shell=True)
-
-    await prog.delete(True)
-
-    reply = await m.reply_text(
-        f"**📦 Processing Complete**\n\n"
-        f"**📽 Title »** `{name}`\n\n"
-        f"**Your video is being prepared for upload.**\n"
-        f"**Please wait…**\n\n"
-        f"**— Uploader System- @noobhusir**"
-    )
-
+async def send_vid(bot: Client, m: Message, cc, filename, name):
 
     try:
-        if thumb == "/d":
-            thumbnail = f"{filename}.jpg"
-        else:
-            thumbnail = thumb
-            
-    except Exception as e:
-        await m.reply_text(str(e))
+        dur = int(duration(filename))
 
-    dur = int(duration(filename))
+        await m.reply_video(
+            filename,
+            caption=cc,
+            supports_streaming=True,
+            duration=dur
+        )
 
-    start_time = time.time()
-
-    try:
-        await m.reply_video(filename,caption=cc, supports_streaming=True,height=720,width=1280,thumb=thumbnail,duration=dur, progress=progress_bar,progress_args=(reply,start_time))
     except Exception:
-        await m.reply_document(filename,caption=cc, progress=progress_bar,progress_args=(reply,start_time))
-    
+        # fallback to document if video fails
+        await m.reply_document(
+            filename,
+            caption=cc
+        )
+
     finally:
-        os.remove(filename)
-        os.remove(f"{filename}.jpg")
-        await reply.delete(True)
+        if os.path.exists(filename):
+            os.remove(filename)
