@@ -66,90 +66,6 @@ photoyt = 'https://tinypic.host/images/2025/03/18/YouTube-Logo.wine.png' #https:
 photocp = 'https://tinypic.host/images/2025/03/28/IMG_20250328_133126.jpg'
 photozip = 'https://envs.sh/cD_.jpg'
 
-async def show_random_sticker(message):
-    stickers = [
-        "CAACAgUAAxkBAgtYgmhJulWpx_vDy1GIlR7G6OwctKcxAAI8EAACrMzBVx3chxfkiidyNgQ",
-        "CAACAgUAAxkBAgtYimhJunqI-FZhP7O-kI5bvbgFnBp9AAI5DgAC9Zq5VxHj-qYjt_uiNgQ",
-        "CAACAgUAAxkBAgtYmmhJur1nXNcMVudkC2fuXil4VpF3AAJ2CAAClK4oVCPT07wRGlstNgQ",
-        "CAACAgUAAxkBAgtYsGhJuu61JUQ0l_zLgLycyQqZ9sNWAAJrBwACyBgxVAbAdpK8418FNgQ",
-        "CAACAgUAAxkBAgtYxGhJuxzg8nTWlm9AlibQKY0hXIqoAAJyDgACpJ_BVyMa2ID2mvxsNgQ",
-        "CAACAgUAAxkBAgtXRWhJtq0ZiRrJ-Mp-Kftwv99yqTT3AAJoEAACflu4V8-evzGsFbJINgQ",
-        "CAACAgUAAxkBAgtYimhJunqI-FZhP7O-kI5bvbgFnBp9AAI5DgAC9Zq5VxHj-qYjt_uiNgQ",
-        "CAACAgUAAxkBAgteJGhJzy2dX3ZNxyiFTH5Kgc8ck7xTAAJVBgACps4xVHnQl8Vnupc9NgQ",
-        "CAACAgUAAxkBAgteMmhJz2ARUku-WEvY1cD8RNaqHvn2AAL5DwACsl7BV70t2N_61gPmNgQ",
-        "CAACAgUAAxkBAgtXR2hJtr3hUJuGEUVyh1ubpjmXqHE2AAIxDwACKQ_BV1TJl9nmPt9QNgQ",
-        "CAACAgUAAxkBAgteMmhJz2ARUku-WEvY1cD8RNaqHvn2AAL5DwACsl7BV70t2N_61gPmNgQ",
-    ]
-
-    selected_sticker = random.choice(stickers)
-    sticker_message = await message.reply_sticker(selected_sticker)
-    return sticker_message
-
-# Romantic Inline keyboard for start command
-BUTTONSCONTACT = InlineKeyboardMarkup(
-    [
-        [InlineKeyboardButton("Contact 💖", url="https://t.me/noobhusir")]
-    ]
-)
-keyboard = InlineKeyboardMarkup(
-    [
-        [
-            InlineKeyboardButton(
-                text="👨🏻‍💻 Devloper",
-                url="https://t.me/noobhusir",
-            ),
-            InlineKeyboardButton(
-                text="❣️ GITHUB",
-                url="https://github.com/kratik00",
-            ),
-        ],
-        [
-            InlineKeyboardButton(
-                text="🪄 Updates Channel",
-                url="https://t.me/lucifer_update01",
-            ),
-            
-        ],
-    ]
-)
-
-# Image URLs for the random image feature
-image_urls = [
-    
-    "https://i.ibb.co/Xrr7psWb/IMG-20250411-124617-491.jpg",
-    "https://i.ibb.co/bj9v73JS/IMG-20250411-124633-497.jpg",
-    "https://i.ibb.co/h1nj5Hyd/IMG-20250411-124644-073.jpg",
-    "https://i.ibb.co/67JChx68/IMG-20250411-124649-706.jpg",
-    "https://i.ibb.co/yc6PJt3z/IMG-20250411-124654-322.jpg",
-    "https://i.ibb.co/ks7Jh7jz/IMG-20250411-124658-596.jpg",
-    "https://i.ibb.co/FLXXjwFc/IMG-20250411-124702-194.jpg",
-    "https://i.ibb.co/DPw44rXD/IMG-20250411-124710-456.jpg",
-    "https://i.ibb.co/pvwZY9Tw/IMG-20250411-124717-700.jpg",
-    "https://i.ibb.co/8LBBQ9q8/IMG-20250411-124722-649.jpg",
-    "https://i.ibb.co/rKbh9YXy/IMG-20250411-124726-319.jpg",
-    "https://i.ibb.co/LDMGhcvS/IMG-20250411-124739-006.jpg",
-    "https://i.ibb.co/hRg4Vv2F/IMG-20250411-124753-057.jpg",
-    "https://i.ibb.co/r2mFQn4n/IMG-20250411-124756-483.jpg",
-    "https://i.ibb.co/VY7js3yz/IMG-20250411-125632-718.jpg",
-    "https://i.ibb.co/zWxBtgFt/IMG-20250411-125637-024.jpg",
-    "https://i.ibb.co/Pzwn1kbS/IMG-20250411-125640-439.jpg",
-    "https://i.ibb.co/Ps2T00D1/IMG-20250411-125725-177.jpg",
-    "https://i.ibb.co/YBS8y8bL/IMG-20250411-125729-949.jpg",
-    "https://i.ibb.co/NRsWK4B/IMG-20250411-125741-113.jpg",
-    "https://i.ibb.co/yn2p3HyG/IMG-20250411-125744-184.jpg",
-    "https://i.ibb.co/n8PtgGjV/IMG-20250411-125754-702.jpg",
-    "https://i.ibb.co/nNhjLd9s/IMG-20250411-125801-099.jpg",
-    "https://i.ibb.co/XxKJDzJS/IMG-20250411-125815-829.jpg",
-    "https://i.ibb.co/SwLJZBDj/IMG-20250411-125823-235.jpg",
-    "https://i.ibb.co/yndPHBNC/IMG-20250411-125826-345.jpg",
-    "https://i.ibb.co/TxC4V0CD/IMG-20250411-125844-807.jpg",
-    "https://i.ibb.co/Rk074wny/IMG-20250411-125858-873.jpg",
-    "https://i.ibb.co/B2b0yfwW/IMG-20250411-125901-589.jpg",
-    "https://i.ibb.co/C5smTsZd/IMG-20250411-125919-579.jpg",
-    "https://i.ibb.co/tpkmMfGw/IMG-20250411-130536-966.jpg",
-    # Add more image URLs as needed
-]
-
 # 🔹 Add / Update Premium
 async def add_premium_user(user_id: int, expire: datetime):
     await premium_db.update_one(
@@ -251,6 +167,7 @@ async def cookies_handler(client: Client, m: Message):
 
     except Exception as e:
         await m.reply_text(f"⚠️ An error occurred: {str(e)}")
+        
 @bot.on_message(filters.command("add_premium"))
 async def add_premium_cmd(client, message):
 
@@ -351,252 +268,17 @@ async def chk_premium_cmd(client, message):
     )
 
     await message.reply(f"YES PREMIUM\nTill `{expire_ist}`")
-
-
-@bot.on_message(filters.command(["t2t"]))
-async def text_to_txt(client, message: Message):
-    user_id = str(message.from_user.id)
-    # Inform the user to send the text data and its desired file name
-    editable = await message.reply_text(f"<blockquote>Welcome to the Text to .txt Converter!\nSend the **text** for convert into a `.txt` file.</blockquote>")
-    input_message: Message = await bot.listen(message.chat.id)
-    if not input_message.text:
-        await message.reply_text("🚨 **error**: Send valid text data")
-        return
-
-    text_data = input_message.text.strip()
-    await input_message.delete()  # Corrected here
-    
-    await editable.edit("**🔄 Send file name or send /d for filename**")
-    inputn: Message = await bot.listen(message.chat.id)
-    raw_textn = inputn.text
-    await inputn.delete()  # Corrected here
-    await editable.delete()
-
-    if raw_textn == '/d':
-        custom_file_name = 'txt_file'
-    else:
-        custom_file_name = raw_textn
-
-    txt_file = os.path.join("downloads", f'{custom_file_name}.txt')
-    os.makedirs(os.path.dirname(txt_file), exist_ok=True)  # Ensure the directory exists
-    with open(txt_file, 'w') as f:
-        f.write(text_data)
-        
-    await message.reply_document(document=txt_file, caption=f"`{custom_file_name}.txt`\n\nYou can now download your content! 📥")
-    os.remove(txt_file)
-
-# Define paths for uploaded file and processed file
-UPLOAD_FOLDER = '/path/to/upload/folder'
-EDITED_FILE_PATH = '/path/to/save/edited_output.txt'
-
-@bot.on_message(filters.command(["y2t"]))
-async def youtube_to_txt(client, message: Message):
-    user_id = str(message.from_user.id)
-    
-    editable = await message.reply_text(
-        f"Send YouTube Website/Playlist link for convert in .txt file"
-    )
-
-    input_message: Message = await bot.listen(message.chat.id)
-    youtube_link = input_message.text.strip()
-    await input_message.delete(True)
-    await editable.delete(True)
-
-    # Fetch the YouTube information using yt-dlp with cookies
-    ydl_opts = {
-        'quiet': True,
-        'extract_flat': True,
-        'skip_download': True,
-        'force_generic_extractor': True,
-        'forcejson': True,
-        'cookies': 'youtube_cookies.txt'  # Specify the cookies file
-    }
-
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        try:
-            result = ydl.extract_info(youtube_link, download=False)
-            if 'entries' in result:
-                title = result.get('title', 'youtube_playlist')
-            else:
-                title = result.get('title', 'youtube_video')
-        except yt_dlp.utils.DownloadError as e:
-            await message.reply_text(
-                f"<pre><code>🚨 Error occurred {str(e)}</code></pre>"
-            )
-            return
-
-    # Extract the YouTube links
-    videos = []
-    if 'entries' in result:
-        for entry in result['entries']:
-            video_title = entry.get('title', 'No title')
-            url = entry['url']
-            videos.append(f"{video_title}: {url}")
-    else:
-        video_title = result.get('title', 'No title')
-        url = result['url']
-        videos.append(f"{video_title}: {url}")
-
-    # Create and save the .txt file with the custom name
-    txt_file = os.path.join("downloads", f'{title}.txt')
-    os.makedirs(os.path.dirname(txt_file), exist_ok=True)  # Ensure the directory exists
-    with open(txt_file, 'w') as f:
-        f.write('\n'.join(videos))
-
-    # Send the generated text file to the user with a pretty caption
-    await message.reply_document(
-        document=txt_file,
-        caption=f'<a href="{youtube_link}">__**Click Here to Open Link**__</a>\n<pre><code>{title}.txt</code></pre>\n'
-    )
-
-    # Remove the temporary text file after sending
-    os.remove(txt_file)
-
-
-m_file_path= "main.py"
-@bot.on_message(filters.command("getcookies") & filters.private)
-async def getcookies_handler(client: Client, m: Message):
-    try:
-        # Send the cookies file to the user
-        await client.send_document(
-            chat_id=m.chat.id,
-            document=cookies_file_path,
-            caption="Here is the `youtube_cookies.txt` file."
-        )
-    except Exception as e:
-        await m.reply_text(f"⚠️ An error occurred: {str(e)}")     
+   
         
 @bot.on_message(filters.command(["stop"]) )
 async def restart_handler(_, m):
     await m.reply_text("👾**STOPPED BABY**👾", True)
     os.execl(sys.executable, sys.executable, *sys.argv)
 
-@bot.on_message(filters.command("restart"))
-async def restart_handler(_, m):
-   
-     processing_request = False  # Reset the processing flag
-     await m.reply_text("👾**Restarting Bot **👾", True)
-     os.execl(sys.executable, sys.executable, *sys.argv)
-        
-@bot.on_message(filters.command("start"))
-async def start_command(bot, message):
-    img = random.choice(image_urls)
-
-    caption = (
-        "🔥 **Welcome.**\n\n"
-        "💬 I convert **TXT ➜ VIDEO** with speed and precision.\n"
-        "⚡ Upload any `.txt` file and I handle the rest.\n\n"
-        "▶️ Start: **/start**\n"
-        "📘 Guide: **/help**\n\n"
-    )
-
-    await bot.send_photo(
-        message.chat.id,
-        img,
-        caption=caption,
-        reply_markup=keyboard
-    )
-
-
 @bot.on_message(filters.command(["id"]))
 async def id_command(client, message: Message):
     chat_id = message.chat.id
-    await message.reply_text(f"<blockquote>The ID of this chat id is:</blockquote>\n`{chat_id}`")
-
-user_files = {}  # store user uploads
-
-
-@bot.on_message(filters.command("compare") & filters.private)
-async def compare_cmd(_, m: Message):
-    user_files[m.from_user.id] = []
-    await m.reply(
-        "**📁 Send 2 TXT files.\nI will send ONLY lines that don't exist in the other file.**"
-    )
-
-
-@bot.on_message(filters.document & filters.private)
-async def handle_files(client, message: Message):
-
-    user_id = message.from_user.id
-    doc = message.document
-
-    if not doc.file_name.lower().endswith(".txt"):
-        return await message.reply("⚠️ Send only `.txt` files.")
-
-    if user_id not in user_files:
-        return await message.reply("Use /compare first.")
-
-    folder = f"downloads/{user_id}"
-    os.makedirs(folder, exist_ok=True)
-
-    # store original name
-    original_name = doc.file_name
-
-    # save as timestamp internally
-    timestamp = int(time.time() * 1000)
-    file_path = await message.download(file_name=f"{folder}/{timestamp}.txt")
-
-    user_files[user_id].append((file_path, original_name))
-
-    if len(user_files[user_id]) == 1:
-        return await message.reply("📥 First file received.\nSend second file.")
-
-    if len(user_files[user_id]) == 2:
-
-        (file1, name1), (file2, name2) = user_files[user_id]
-
-        with open(file1, "r", encoding="utf-8") as f:
-            lines1 = [l.strip() for l in f if l.strip()]
-
-        with open(file2, "r", encoding="utf-8") as f:
-            lines2 = [l.strip() for l in f if l.strip()]
-
-        diff = []
-
-        for x in lines1:
-            if x not in lines2:
-                diff.append(x)
-
-        for x in lines2:
-            if x not in lines1:
-                diff.append(x)
-
-        if not diff:
-            await message.reply("No difference found.")
-        else:
-
-            base = os.path.splitext(name1)[0]
-            out_name = f"{base}_diff.txt"
-            out_path = f"{folder}/{out_name}"
-
-            with open(out_path, "w", encoding="utf-8") as out:
-                out.write("\n".join(diff))
-
-            await message.reply_document(out_path)
-
-        # cleanup
-        try:
-            shutil.rmtree(folder)
-        except:
-            pass
-
-        user_files[user_id] = []
-@bot.on_message(filters.private & filters.command("info"))
-async def info(bot: Client, update: Message):
-    
-    text = f"""<blockquote> ✨ Information ✨</blockquote>
-
-**🙋🏻‍♂️ First Name :** {update.from_user.first_name}
-**🧖‍♂️ Your Second Name :** {update.from_user.last_name if update.from_user.last_name else 'None'}
-**🧑🏻‍🎓 Your Username :** {update.from_user.username}
-**🆔 Your Telegram ID :** {update.from_user.id}
-**🔗 Your Profile Link :** {update.from_user.mention}"""
-    
-    await update.reply_text(        
-        text=text,
-        disable_web_page_preview=True,
-        reply_markup=BUTTONSCONTACT
-    )
+    await message.reply_text(f"<blockquote>The ID of this chat id is: </blockquote>`{chat_id}`")
 
 @bot.on_message(filters.command(["upload"]))
 async def txt_handler(bot: Client, m: Message):
@@ -659,7 +341,6 @@ async def txt_handler(bot: Client, m: Message):
     
     await editable.edit(
         f"🔹Total Links: {len(links)}\n\n"
-        "📥 Send All Details In ONE Message (6 Lines):\n\n"
         "1️⃣ Start Index\n"
         "2️⃣ Batch Name (or 1)\n"
         "3️⃣ Quality (144/240/360/480/720/1080)\n"
@@ -917,38 +598,14 @@ async def txt_handler(bot: Client, m: Message):
                     keys_string = ""
             elif "childId" in url and "parentId" in url:
                 url = f"https://anonymouspwplayer-25261acd1521.herokuapp.com/pw?url={url}&token={raw_text4}"
-                           
-            elif "raonetech.online" in url:
-                try:
-                    response = requests.get(url, timeout=15)
-                    data = safe_json(response)
-                    link = data.get("link")
-                    if "signature" in link:
-                        url = f"https://appx-player-61eecf1609e9.herokuapp.com/stream?url={link}"
-                    else:
-                        link = url
-                except Exception:
-                    url = url
             
             elif "TYPE=0.00" in url:
                 url = url.split("@", 1)[0]
             elif "d1d34p8vz63oiq" in url or "sec1.pw.live" in url:
                 url = f"https://anonymouspwplayer-25261acd1521.herokuapp.com/pw?url={url}&token={raw_text4}"
-                #url =  f"{api_url}pw-dl?url={url}&token={raw_text4}&authorization={api_token}&q={raw_text2}"
-                #url = f"https://dl.alphacbse.site/download/{vid_id}/master.m3u8"
-            
-            #elif '/master.mpd' in url:    
-                #headers = {"Authorization": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE3NDYyODQwNTYuOTIsImRhdGEiOnsiX2lkIjoiNjdlYTcyYjZmODdlNTNjMWZlNzI5MTRlIiwidXNlcm5hbWUiOiI4MzQ5MjUwMTg1IiwiZmlyc3ROYW1lIjoiSGFycnkiLCJvcmdhbml6YXRpb24iOnsiX2lkIjoiNWViMzkzZWU5NWZhYjc0NjhhNzlkMTg5Iiwid2Vic2l0ZSI6InBoeXNpY3N3YWxsYWguY29tIiwibmFtZSI6IlBoeXNpY3N3YWxsYWgifSwicm9sZXMiOlsiNWIyN2JkOTY1ODQyZjk1MGE3NzhjNmVmIl0sImNvdW50cnlHcm91cCI6IklOIiwidHlwZSI6IlVTRVIifSwiaWF0IjoxNzQ1Njc5MjU2fQ.6WMjQPLUPW-fMCViXERGSqhpFZ-FyX-Vjig7L531Q6U", "client-type": "WEB", "randomId": "142d9660-50df-41c0-8fcb-060609777b03"}
-                #id =  url.split("/")[-2] 
-                #policy = requests.post('https://api.penpencil.xyz/v1/files/get-signed-cookie', headers=headers, json={'url': f"https://d1d34p8vz63oiq.cloudfront.net/" + id + "/master.mpd"}).json()['data']
-                #url = "https://sr-get-video-quality.selav29696.workers.dev/?Vurl=" + "https://d1d34p8vz63oiq.cloudfront.net/" + id + f"/hls/{raw_text2}/main.m3u8" + policy
-                #print(url)
-
 
             if ".pdf*" in url:
                 url = f"https://dragoapi.vercel.app/pdf/{url}"
-           # if ".zip" in url:
-              #  url = f"https://appxapi-af3062f1d56e.herokuapp.com/appx-zip?url={url}"
                 
             elif 'encrypted.m' in url:
                 appxkey = url.split('*')[1]
@@ -1056,18 +713,7 @@ async def txt_handler(bot: Client, m: Message):
                         await m.reply_text(str(e))
                         time.sleep(e.x)
                         continue    
-
-                elif ".zips" in url:
-                    try:
-                        BUTTONSZIP = InlineKeyboardMarkup([[InlineKeyboardButton(text="🎥 ZIP STREAM IN PLAYER", url=f"{url}")]])
-                        await bot.send_photo(chat_id=m.chat.id, photo=photozip, caption=cczip, reply_markup=BUTTONSZIP)
-                        count += 1
-                        time.sleep(1)
-                    except FloodWait as e:
-                        await m.reply_text(str(e))
-                        time.sleep(e.x)
-                        continue
-
+                        
                 elif any(ext in url.lower() for ext in [".jpg", ".jpeg", ".png", ".webp"]):
                     try:
                         ext = url.split('.')[-1].split("?")[0]
@@ -1117,104 +763,26 @@ async def txt_handler(bot: Client, m: Message):
                         continue    
 
                     
-                elif 'encrypted.m' in url:    
-                    remaining_links = len(links) - count
-                    progress = (count / len(links)) * 100
-                    sticker_message = await show_random_sticker(message)
-                    Show = (
-                        f"╭━━━⧖ STATUS ⧗━━━╮\n"
-                        f"📈 <b>Progress:</b> {progress:.2f}%\n"
-                        f"🔗 <b>Links:</b> {count} / {len(links)}\n"
-                        f"⏳ <b>Remaining:</b> {remaining_links}\n"
-                        f"╰━━━━━━━━━━━━━━━━╯\n\n"
-                        f"📚 <b>Batch:</b> {b_name}\n"
-                        f"👤 <b>User:</b> {CR}\n\n"
-                        f"🎬 <b>Title:</b> {name}\n"
-                        f"💫 <b>Quality:</b> {quality}\n"
-                        f"🔗 <b>Source:</b> <a href='{link0}'>Open Link</a>\n\n"
-                        f"⌛ <i>Processing… stay patient.</i>\n"
-                        f"🛑 <i>Use /stop to cancel.</i>"
-                    )
-
-                    prog = await m.reply_text(Show, disable_web_page_preview=True)
-                    res_file = await helper.download_and_decrypt_video(url, cmd, name, appxkey)  
-                    filename = res_file  
-                    await sticker_message.delete()
-                    await prog.delete(True)  
-                    await helper.send_vid(bot, m, cc, filename, thumb, name, prog)  
-                    count += 1  
-                    await asyncio.sleep(1)  
-                    continue  
-
-                elif 'drmcdni' in url or 'drm/wv' in url or 'drm/common' in url:
-                    remaining_links = len(links) - count
-                    progress = (count / len(links)) * 100
-                    sticker_message = await show_random_sticker(message)
-                    Show = (
-                        f"╭━━━⧖ STATUS ⧗━━━╮\n"
-                        f"📈 <b>Progress:</b> {progress:.2f}%\n"
-                        f"🔗 <b>Links:</b> {count} / {len(links)}\n"
-                        f"⏳ <b>Remaining:</b> {remaining_links}\n"
-                        f"╰━━━━━━━━━━━━━━━━╯\n\n"
-                        f"📚 <b>Batch:</b> {b_name}\n"
-                        f"👤 <b>User:</b> {CR}\n\n"
-                        f"🎬 <b>Title:</b> {name}\n"
-                        f"💫 <b>Quality:</b> {quality}\n"
-                        f"🔗 <b>Source:</b> <a href='{link0}'>Open Link</a>\n\n"
-                        f"⌛ <i>Processing… stay patient.</i>\n"
-                        f"🛑 <i>Use /stop to cancel.</i>"
-                    )
-
-                    prog = await m.reply_text(Show, disable_web_page_preview=True)
-                    res_file = await helper.decrypt_and_merge_video(mpd, keys_string, path, name, raw_text2)
-                    filename = res_file
-                    await sticker_message.delete()
-                    await prog.delete(True)
-                    await helper.send_vid(bot, m, cc, filename, thumb, name, prog)
-                    count += 1
-                    await asyncio.sleep(1)
+                elif 'encrypted.m' in url:
+                    res_file = await helper.download_and_decrypt_video(url, cmd, name, appxkey)
+                    if res_file:
+                        await helper.send_vid(bot, m, cc, res_file, thumb, name)
+                        count += 1
                     continue
-
-                else:
-                    remaining_links = len(links) - count
-                    progress = (count / len(links)) * 100
-                    sticker_message = await show_random_sticker(message)
-
-
-
-                    Show = (
-                        f"╭━━━⧖ STATUS ⧗━━━╮\n"
-                        f"📈 <b>Progress:</b> {progress:.2f}%\n"
-                        f"🔗 <b>Links:</b> {count} / {len(links)}\n"
-                        f"⏳ <b>Remaining:</b> {remaining_links}\n"
-                        f"╰━━━━━━━━━━━━━━━━╯\n\n"
-                        f"📚 <b>Batch:</b> {b_name}\n"
-                        f"👤 <b>User:</b> {CR}\n\n"
-                        f"🎬 <b>Title:</b> {name}\n"
-                        f"💫 <b>Quality:</b> {quality}\n"
-                        f"🔗 <b>Source:</b> <a href='{link0}'>Open Link</a>\n\n"
-                        f"⌛ <i>Processing… stay patient.</i>\n"
-                        f"🛑 <i>Use /stop to cancel.</i>"
-                    )
-
-
-                    prog = await m.reply_text(Show, disable_web_page_preview=True)
-                    res_file = await helper.download_video(url, cmd, name)
-                    filename = res_file
-                    await sticker_message.delete()
-                    await prog.delete(True)
-                    await helper.send_vid(bot, m, cc, filename, thumb, name, prog)
-                    count += 1
-                    time.sleep(1)
                 
-            except Exception as e:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
-                await m.reply_text(                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
-                    f"**downloading failed **\n\n{str(e)}\n\n**Name** - {name}\n**Link** - {url}"
-                    )
-                count += 1
-                failed_count += 1
-                continue
-
+                elif 'drmcdni' in url or 'drm/wv' in url or 'drm/common' in url:
+                    res_file = await helper.decrypt_and_merge_video(mpd, keys_string, path, name, raw_text2)
+                    if res_file:
+                        await helper.send_vid(bot, m, cc, res_file, thumb, name)
+                        count += 1    
+                    continue
+                
+                else:
+                    res_file = await helper.download_video(url, cmd, name)
+                    if res_file:
+                        await helper.send_vid(bot, m, cc, res_file, thumb, name)
+                        count += 1
+                    continue
     except Exception as e:
         await m.reply_text(e)
         time.sleep(2)
