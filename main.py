@@ -41,6 +41,7 @@ import zipfile
 import shutil
 import ffmpeg
 import pytz, datetime
+from datetime import datetime, timezone
 from motor.motor_asyncio import AsyncIOMotorClient
 
 mongo = AsyncIOMotorClient(MONGO_URL)
@@ -166,24 +167,37 @@ async def check_premium_user(user_id:int):
 async def get_all_premium():
     return premium_db.find({})
 
-from pyrogram.enums import ChatMembersFilter, ChatType
-import time
+async def is_premium_user(user_id: int) -> bool:
+    user = await premium_db.find_one({"_id": user_id})
+
+    if not user:
+        return False
+
+    expire_date = user.get("expire_date")
+
+    if not expire_date:
+        return False
+
+    # Compare datetime properly
+    if expire_date < datetime.now(timezone.utc):
+        # Optional: auto remove expired
+        await premium_db.delete_one({"_id": user_id})
+        return False
+
+    return True
 
 async def check_premium_access(bot: Client, m: Message):
 
     # PRIVATE
     if m.chat.type == ChatType.PRIVATE:
-        user = await check_premium_user(m.from_user.id)
-        return bool(user and user.get("expire_date", 0) > int(time.time()))
+        return await is_premium_user(m.from_user.id)
 
-    # GROUP / SUPERGROUP / CHANNEL
+    # GROUP / CHANNEL
     async for admin in bot.get_chat_members(
         m.chat.id,
         filter=ChatMembersFilter.ADMINISTRATORS
     ):
-        admin_data = await check_premium_user(admin.user.id)
-
-        if admin_data and admin_data.get("expire_date", 0) > int(time.time()):
+        if await is_premium_user(admin.user.id):
             return True
 
     return False
