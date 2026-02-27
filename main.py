@@ -30,7 +30,7 @@ import random
 from pyromod import listen
 from pyrogram import Client, filters
 from pyrogram.types import Message
-from pyrogram.errors import FloodWait
+from pyrogram.errors import FloodWait, ChatAdminRequired
 from pyrogram.errors.exceptions.bad_request_400 import StickerEmojiInvalid
 from pyrogram.types.messages_and_media import message
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
@@ -150,7 +150,8 @@ image_urls = [
     # Add more image URLs as needed
 ]
 
-async def add_premium_user(user_id:int, expire:datetime.datetime):
+# 🔹 Add / Update Premium
+async def add_premium_user(user_id: int, expire: datetime):
     await premium_db.update_one(
         {"_id": user_id},
         {"$set": {"expire_date": expire}},
@@ -158,15 +159,22 @@ async def add_premium_user(user_id:int, expire:datetime.datetime):
     )
 
 
-async def remove_premium_user(user_id:int):
+# 🔹 Remove Premium
+async def remove_premium_user(user_id: int):
     await premium_db.delete_one({"_id": user_id})
 
-async def check_premium_user(user_id:int):
+
+# 🔹 Get Raw Premium Data
+async def check_premium_user(user_id: int):
     return await premium_db.find_one({"_id": user_id})
 
-async def get_all_premium():
+
+# 🔹 Get All Premium Users (cursor)
+def get_all_premium():
     return premium_db.find({})
 
+
+# 🔹 Boolean Premium Check (MAIN FUNCTION YOU SHOULD USE)
 async def is_premium_user(user_id: int) -> bool:
     user = await premium_db.find_one({"_id": user_id})
 
@@ -178,9 +186,9 @@ async def is_premium_user(user_id: int) -> bool:
     if not expire_date:
         return False
 
-    # Compare datetime properly
+    # Expiry check
     if expire_date < datetime.now(timezone.utc):
-        # Optional: auto remove expired
+        # Auto remove expired user
         await premium_db.delete_one({"_id": user_id})
         return False
 
@@ -188,17 +196,18 @@ async def is_premium_user(user_id: int) -> bool:
 
 async def check_premium_access(bot: Client, m: Message):
 
-    # PRIVATE
     if m.chat.type == ChatType.PRIVATE:
         return await is_premium_user(m.from_user.id)
 
-    # GROUP / CHANNEL
-    async for admin in bot.get_chat_members(
-        m.chat.id,
-        filter=ChatMembersFilter.ADMINISTRATORS
-    ):
-        if await is_premium_user(admin.user.id):
-            return True
+    try:
+        async for admin in bot.get_chat_members(
+            m.chat.id,
+            filter=ChatMembersFilter.ADMINISTRATORS
+        ):
+            if await is_premium_user(admin.user.id):
+                return True
+    except ChatAdminRequired:
+        return False
 
     return False
 @bot.on_message(filters.command("cookies") & filters.private)
