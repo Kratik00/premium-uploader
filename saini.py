@@ -348,7 +348,7 @@ async def download_and_decrypt_video(url, cmd, name, key):
             print(f"Failed to decrypt {video_path}.")  
             return None  
 
-async def send_vid(bot: Client, m: Message, cc, filename, thumb, name):
+async def send_vid(bot: Client, m: Message, cc, filename, name):
 
     # 🔹 Generate thumbnail at 2 seconds (safer than 10s)
     subprocess.run(
