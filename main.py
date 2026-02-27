@@ -588,17 +588,17 @@ async def txt_handler(bot: Client, m: Message):
             try:
                 # cc = f"**╭━━━━━ INFO ━━━━━╮**\n💫 **Video ID:** `{str(count).zfill(3)}`\n**╰━━━━━━━━━━━━━━╯**\n\n📁 **Title:** `{name1} ({res}) lucifer.mkv`\n📚 **Course:** `{b_name}`\n\n⚡ **Downloaded By:** {CR}"
                 cc = (
-                    f"**Index**: {str(count).zfill(3)}\n"
-                    f"**Title**: {name1}.mp4\n"
-                    f"**Batch**: {b_name}\n"
+                    f"**Index**: {str(count).zfill(3)}\n\n"
+                    f"**Title**: {name1}.mp4\n\n"
+                    f"**Batch**: {b_name}\n\n"
                     f"**Uploaded By**: {CR}"
                 )
                 # cc1 = f"<blockquote>╭━━━━━ INFO ━━━━━╮\n💫 <b>File ID:</b> <b>{str(count).zfill(3)}</b>\n╰━━━━━━━━━━━━━━╯\n\n📁 <b>Title:</b> <b>{name1} lucifer.pdf</b>\n📚 <b>Course:</b> <b>{b_name}</b>\n\n⚡ **Downloaded By:** {CR}</blockquote>"
                 #cczip = f"**——— ✦ {str(count).zfill(3)} ✦ ———**\n\n📁 **Title:** `{name1}.zip`\n📚 **Course:** `{b_name}`\n\n⚡ **Extracted By:** {CR}"
                 cc1 = (
-                    f"**Index**: {str(count).zfill(3)}\n"
-                    f"**Title**: {name1}.pdf\n"
-                    f"**Batch**: {b_name}\n"
+                    f"**Index**: {str(count).zfill(3)}\n\n"
+                    f"**Title**: {name1}.pdf\n\n"
+                    f"**Batch**: {b_name}\n\n"
                     f"**Uploaded By**: {CR}"
                 )
                 # ccimg = f"**╭━━━━ IMAGE ━━━━╮**\n💫 **Image ID:** `{str(count).zfill(3)}`\n**╰━━━━━━━━━━━━━━╯**\n\n📁 **Title:** `{name1} lucifer.JPG`\n📚 **Course:** `{b_name}`\n\n⚡ **Downloaded By:** {CR}"
@@ -608,15 +608,15 @@ async def txt_handler(bot: Client, m: Message):
                     f"**Title**: {name1}.jpg\n"
                 )
                 ccm = (
-                    f"**Index**: {str(count).zfill(3)}\n"
-                    f"**Title**: {name1}.mp3\n"
-                    f"**Batch**: {b_name}\n"
+                    f"**Index**: {str(count).zfill(3)}\n\n"
+                    f"**Title**: {name1}.mp3\n\n"
+                    f"**Batch**: {b_name}\n\n"
                     f"**Uploaded By**: {CR}"
                 )
                 cchtml = (
-                    f"**Index**: {str(count).zfill(3)}\n"
-                    f"**Title**: {name1}.html\n"
-                    f"**Batch**: {b_name}\n"
+                    f"**Index**: {str(count).zfill(3)}\n\n"
+                    f"**Title**: {name1}.html\n\n"
+                    f"**Batch**: {b_name}\n\n"
                     f"**Uploaded By**: {CR}"
                 )
     
