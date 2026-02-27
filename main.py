@@ -34,6 +34,7 @@ from pyrogram.errors import FloodWait
 from pyrogram.errors.exceptions.bad_request_400 import StickerEmojiInvalid
 from pyrogram.types.messages_and_media import message
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from pyrogram.enums import ChatMembersFilter, ChatType
 import aiohttp
 import aiofiles
 import zipfile
@@ -165,27 +166,27 @@ async def check_premium_user(user_id:int):
 async def get_all_premium():
     return premium_db.find({})
 
+from pyrogram.enums import ChatMembersFilter, ChatType
+import time
+
 async def check_premium_access(bot: Client, m: Message):
 
-    # 1️⃣ PRIVATE CHAT
-    if m.chat.type == "private":
+    # PRIVATE
+    if m.chat.type == ChatType.PRIVATE:
         user = await check_premium_user(m.from_user.id)
-        if user and user.get("expire_date", 0) > int(time.time()):
-            return True
-        return False
+        return bool(user and user.get("expire_date", 0) > int(time.time()))
 
-    # 2️⃣ GROUP / SUPERGROUP / CHANNEL
+    # GROUP / SUPERGROUP / CHANNEL
     async for admin in bot.get_chat_members(
         m.chat.id,
-        filter="administrators"
+        filter=ChatMembersFilter.ADMINISTRATORS
     ):
         admin_data = await check_premium_user(admin.user.id)
 
         if admin_data and admin_data.get("expire_date", 0) > int(time.time()):
-            return True   # 🔥 Any admin premium → whole chat premium
+            return True
 
     return False
-
 @bot.on_message(filters.command("cookies") & filters.private)
 async def cookies_handler(client: Client, m: Message):
     await m.reply_text(
