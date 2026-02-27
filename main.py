@@ -599,14 +599,9 @@ async def txt_handler(bot: Client, m: Message):
             elif "childId" in url and "parentId" in url:
                 url = f"https://anonymouspwplayer-25261acd1521.herokuapp.com/pw?url={url}&token={raw_text4}"
             
-            elif "TYPE=0.00" in url:
-                url = url.split("@", 1)[0]
             elif "d1d34p8vz63oiq" in url or "sec1.pw.live" in url:
                 url = f"https://anonymouspwplayer-25261acd1521.herokuapp.com/pw?url={url}&token={raw_text4}"
 
-            if ".pdf*" in url:
-                url = f"https://dragoapi.vercel.app/pdf/{url}"
-                
             elif 'encrypted.m' in url:
                 appxkey = url.split('*')[1]
                 url = url.split('*')[0]
@@ -766,21 +761,21 @@ async def txt_handler(bot: Client, m: Message):
                 elif 'encrypted.m' in url:
                     res_file = await helper.download_and_decrypt_video(url, cmd, name, appxkey)
                     if res_file:
-                        await helper.send_vid(bot, m, cc, res_file, thumb, name)
+                        await helper.send_vid(bot, m, cc, res_file, name)
                         count += 1
                     continue
                 
                 elif 'drmcdni' in url or 'drm/wv' in url or 'drm/common' in url:
                     res_file = await helper.decrypt_and_merge_video(mpd, keys_string, path, name, raw_text2)
                     if res_file:
-                        await helper.send_vid(bot, m, cc, res_file, thumb, name)
+                        await helper.send_vid(bot, m, cc, res_file, name)
                         count += 1    
                     continue
                 
                 else:
                     res_file = await helper.download_video(url, cmd, name)
                     if res_file:
-                        await helper.send_vid(bot, m, cc, res_file, thumb, name)
+                        await helper.send_vid(bot, m, cc, res_file, name)
                         count += 1
                     continue
     except Exception as e:
