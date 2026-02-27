@@ -165,6 +165,27 @@ async def check_premium_user(user_id:int):
 async def get_all_premium():
     return premium_db.find({})
 
+async def check_premium_access(bot: Client, m: Message):
+
+    # 1️⃣ PRIVATE CHAT
+    if m.chat.type == "private":
+        user = await check_premium_user(m.from_user.id)
+        if user and user.get("expire_date", 0) > int(time.time()):
+            return True
+        return False
+
+    # 2️⃣ GROUP / SUPERGROUP / CHANNEL
+    async for admin in bot.get_chat_members(
+        m.chat.id,
+        filter="administrators"
+    ):
+        admin_data = await check_premium_user(admin.user.id)
+
+        if admin_data and admin_data.get("expire_date", 0) > int(time.time()):
+            return True   # 🔥 Any admin premium → whole chat premium
+
+    return False
+
 @bot.on_message(filters.command("cookies") & filters.private)
 async def cookies_handler(client: Client, m: Message):
     await m.reply_text(
@@ -397,17 +418,7 @@ async def getcookies_handler(client: Client, m: Message):
         )
     except Exception as e:
         await m.reply_text(f"⚠️ An error occurred: {str(e)}")     
-# @bot.on_message(filters.command("mfile") & filters.private)
-# async def getcookies_handler(client: Client, m: Message):
-#     try:
-#         await client.send_document(
-#             chat_id=m.chat.id,
-#             document=m_file_path,
-#             caption="Here is the `main.py` file."
-#         )
-#     except Exception as e:
-#         await m.reply_text(f"⚠️ An error occurred: {str(e)}")
-
+        
 @bot.on_message(filters.command(["stop"]) )
 async def restart_handler(_, m):
     await m.reply_text("👾**STOPPED BABY**👾", True)
@@ -588,20 +599,24 @@ def safe_json(response):
         return response.json()
     except Exception:
         return None
-@bot.on_message(filters.command(["upload"]) )
+
+@bot.on_message(filters.command(["upload"]))
 async def txt_handler(bot: Client, m: Message):
-    data = await check_premium_user(m.from_user.id)
-    if not data or not data.get("expire_date"):
+
+    if not await check_premium_access(bot, m):
         return await m.reply_text(
             "**❌ Premium Required**\n\n"
             "This feature is only available for premium users."
         )
 
-    editable = await m.reply_text(f"**⚡𝗦𝖾𝗇𝖽 𝗧𝗑𝗍 𝗙𝗂𝗅𝖾⚡**")
-    input: Message = await bot.listen(editable.chat.id)
-    y = await input.download()
-    await input.delete(True)
-    file_name, ext = os.path.splitext(os.path.basename(y))  # Extract filename & extension
+    editable = await m.reply_text("**⚡𝗦𝖾𝗇𝖽 𝗧𝗑𝗍 𝗙𝗂𝗅𝖾⚡**")
+
+    input_msg: Message = await bot.listen(editable.chat.id)
+
+    y = await input_msg.download()
+    await input_msg.delete(True)
+
+    file_name, ext = os.path.splitext(os.path.basename(y))
 
     if file_name.endswith("_helper"):  # ✅ Check if filename ends with "_helper"
         x = decrypt_file_txt(y)  # Decrypt the file
