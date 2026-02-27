@@ -670,7 +670,7 @@ async def txt_handler(bot: Client, m: Message):
     try:
         input_all: Message = await bot.listen(
             editable.chat.id,
-            filters=filters.user(m.from_user.id),
+            filters=filters.user(m.from_user.id) if m.from_user else None,
             timeout=180
         )
     except asyncio.TimeoutError:
