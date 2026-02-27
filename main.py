@@ -162,7 +162,7 @@ async def cookies_handler(client: Client, m: Message):
             target_file.write(cookies_content)
 
         await input_message.reply_text(
-            "✅ Cookies updated successfully.\n📂 Saved in `youtube_cookies.txt`."
+            "Cookies updated successfully."
         )
 
     except Exception as e:
@@ -195,7 +195,7 @@ async def add_premium_cmd(client, message):
     await message.reply(f"⭐ Premium given to `{uid}`\nExpires: `{expire_ist}`")
 
     try:
-        await client.send_message(uid, f"🔥 You are now premium till {expire_ist}")
+        await client.send_message(uid, f"__PREMIUM ACTIVATED__")
     except:
         pass
 
@@ -215,7 +215,7 @@ async def remove_premium_cmd(client, message):
     await message.reply("Removed successfully.")
 
     try:
-        await client.send_message(uid, "Your premium is removed.")
+        await client.send_message(uid, "Premium Deactivated.")
     except:
         pass
 
@@ -245,48 +245,18 @@ async def premium_users_cmd(client, message):
         text += f"{i}. `{u['_id']}`\n⏳ Till: `{expire_ist}`\n\n"
 
     await message.reply(text)
-
-@bot.on_message(filters.command("chk_premium"))
-async def chk_premium_cmd(client, message):
-
-    if len(message.command) != 2:
-        return await message.reply("Usage: `/chk_premium user_id`")
-
-    uid = int(message.command[1])
-
-    data = await check_premium_user(uid)
-
-    if not data:
-        return await message.reply("Not premium.")
-
-    expire = data["expire_date"]
-
-    expire_ist = (
-        expire.replace(tzinfo=pytz.utc)
-        .astimezone(pytz.timezone("Asia/Kolkata"))
-        .strftime("%d-%m-%Y %I:%M %p")
-    )
-
-    await message.reply(f"YES PREMIUM\nTill `{expire_ist}`")
-   
-        
+    
 @bot.on_message(filters.command(["stop"]) )
 async def restart_handler(_, m):
-    await m.reply_text("👾**STOPPED BABY**👾", True)
+    await m.reply_text("Task Cancelled", True)
     os.execl(sys.executable, sys.executable, *sys.argv)
-
-@bot.on_message(filters.command(["id"]))
-async def id_command(client, message: Message):
-    chat_id = message.chat.id
-    await message.reply_text(f"<blockquote>The ID of this chat id is: </blockquote>`{chat_id}`")
 
 @bot.on_message(filters.command(["upload"]))
 async def txt_handler(bot: Client, m: Message):
 
     if not await check_premium_access(bot, m):
         return await m.reply_text(
-            "**❌ Premium Required**\n\n"
-            "This feature is only available for premium users."
+            "❌ __Unauthorised Attempt Detected.__"
         )
 
     try:
@@ -294,7 +264,7 @@ async def txt_handler(bot: Client, m: Message):
     except:
         pass
 
-    editable = await m.reply_text("**⚡𝗦𝖾𝗇𝖽 𝗧𝗑𝗍 𝗙𝗂𝗅𝖾⚡**")
+    editable = await m.reply_text("S𝖾𝗇𝖽 T𝗑𝗍 f𝗂𝗅𝖾 To Download!")
 
     input_msg: Message = await bot.listen(editable.chat.id)
 
@@ -335,18 +305,16 @@ async def txt_handler(bot: Client, m: Message):
                     other_count += 1
         os.remove(x)
     except:
-        await m.reply_text("<pre><code>🔹Invalid file input.</code></pre>")
+        await m.reply_text("<pre><code> Invalid file input.</code></pre>")
         os.remove(x)
         return
     
     await editable.edit(
-        f"🔹Total Links: {len(links)}\n\n"
-        "1️⃣ Start Index\n"
-        "2️⃣ Batch Name (or 1)\n"
-        "3️⃣ Quality (144/240/360/480/720/1080)\n"
-        "4️⃣ Your Name (or 1)\n"
-        "5️⃣ PW Token (or /anything)\n"
-        "6️⃣ Thumb URL (or /d or No)\n\n"
+        f"🧾 Enter input in the following lines:"
+        "1️⃣ Index (e.g. 1 or 1-{len(links)})\n"
+        "2️⃣ Batch name (0 to skip)\n"
+        "3️⃣ Resolution (360/480/720)\n"
+        "4️⃣ Credit (0 to default)\n"
     )
     try:
         input_all: Message = await bot.listen(
@@ -356,30 +324,28 @@ async def txt_handler(bot: Client, m: Message):
         )
     except asyncio.TimeoutError:
         await editable.delete()
-        return await m.reply_text("⏰ Session expired. Use /upload again.")
+        return await m.reply_text("Time Over. Use /upload again.")
         
     if input_all.text.lower() in ["/cancel", "cancel"]:
         await editable.delete()
-        return await m.reply_text("❌ Upload cancelled.")
+        return await m.reply_text("❌ __Upload cancelled.__")
         
     data = input_all.text.strip().split("\n")
     await input_all.delete(True)
     
     if len(data) < 6:
         await editable.delete()
-        return await m.reply_text("❌ Invalid format. Send exactly 6 lines.")
+        return await m.reply_text("❌ __Invalid format.__")
         
     raw_text = data[0].strip()
     raw_text0 = data[1].strip()
     raw_text2 = data[2].strip()
     raw_text3 = data[3].strip()
-    raw_text4 = data[4].strip()
-    raw_text6 = data[5].strip()
     
     count = int(raw_text)
     arg = int(raw_text)
     
-    if raw_text0 == "1":
+    if raw_text0 == "0":
         b_name = file_name.replace('_', ' ')
     else:
         b_name = raw_text0
@@ -396,28 +362,23 @@ async def txt_handler(bot: Client, m: Message):
     
     res = quality_map.get(raw_text2, "UN")
     
-    if raw_text3 == "1":
+    if raw_text3 == "0":
         CR = '[LUCIFER](https://t.me/NOOBHUSIR)'
     else:
         CR = raw_text3
         
-    if raw_text6.lower() == "no" or raw_text6 == "/d":
-        thumb = None
-    elif raw_text6.startswith("http://") or raw_text6.startswith("https://"):
-        getstatusoutput(f"wget '{raw_text6}' -O 'thumb.jpg'")
-        thumb = "thumb.jpg"
-    else:
-        thumb = raw_text6
-        
     await editable.delete()
     sent_msg = await bot.send_message(
         m.chat.id,
-        f"__**🎯Target Batch : {b_name}**__"
+        f"**Batch** : {b_name}"
     )
     
     if m.chat.type != ChatType.PRIVATE:
         try:
             await sent_msg.pin(disable_notification=True)
+            async for msg in bot.get_chat_history(m.chat.id, limit=1):
+                if msg.service:
+                    await msg.delete()
         except:
             pass
 
@@ -625,12 +586,39 @@ async def txt_handler(bot: Client, m: Message):
                 cmd = f'yt-dlp -f "{ytf}" "{url}" -o "{name}.mp4"'
 
             try:
-                cc = f"**╭━━━━━ INFO ━━━━━╮**\n💫 **Video ID:** `{str(count).zfill(3)}`\n**╰━━━━━━━━━━━━━━╯**\n\n📁 **Title:** `{name1} ({res}) lucifer.mkv`\n📚 **Course:** `{b_name}`\n\n⚡ **Downloaded By:** {CR}"
-                cc1 = f"<blockquote>╭━━━━━ INFO ━━━━━╮\n💫 <b>File ID:</b> <b>{str(count).zfill(3)}</b>\n╰━━━━━━━━━━━━━━╯\n\n📁 <b>Title:</b> <b>{name1} lucifer.pdf</b>\n📚 <b>Course:</b> <b>{b_name}</b>\n\n⚡ **Downloaded By:** {CR}</blockquote>"
-                cczip = f"**——— ✦ {str(count).zfill(3)} ✦ ———**\n\n📁 **Title:** `{name1}.zip`\n📚 **Course:** `{b_name}`\n\n⚡ **Extracted By:** {CR}"
-                ccimg = f"**╭━━━━ IMAGE ━━━━╮**\n💫 **Image ID:** `{str(count).zfill(3)}`\n**╰━━━━━━━━━━━━━━╯**\n\n📁 **Title:** `{name1} lucifer.JPG`\n📚 **Course:** `{b_name}`\n\n⚡ **Downloaded By:** {CR}"
-                ccm = f"**——— ✦ {str(count).zfill(3)} ✦ ———**\n\n🎵 **Title:** `{name1}.mp3`\n📚 **Course:** `{b_name}`\n\n⚡ **Extracted By:** {CR}"
-                cchtml = f"**——— ✦ {str(count).zfill(3)} ✦ ———**\n\n🌐 **Title:** `{name1}.html`\n📚 **Course:** `{b_name}`\n\n⚡ **Extracted By:** {CR}"
+                # cc = f"**╭━━━━━ INFO ━━━━━╮**\n💫 **Video ID:** `{str(count).zfill(3)}`\n**╰━━━━━━━━━━━━━━╯**\n\n📁 **Title:** `{name1} ({res}) lucifer.mkv`\n📚 **Course:** `{b_name}`\n\n⚡ **Downloaded By:** {CR}"
+                cc = (
+                    f"**Index**: {str(count).zfill(3)}\n"
+                    f"**Title**: {name1}.mp4\n"
+                    f"**Batch**: {b_name}\n"
+                    f"**Uploaded By**: {CR}"
+                )
+                # cc1 = f"<blockquote>╭━━━━━ INFO ━━━━━╮\n💫 <b>File ID:</b> <b>{str(count).zfill(3)}</b>\n╰━━━━━━━━━━━━━━╯\n\n📁 <b>Title:</b> <b>{name1} lucifer.pdf</b>\n📚 <b>Course:</b> <b>{b_name}</b>\n\n⚡ **Downloaded By:** {CR}</blockquote>"
+                #cczip = f"**——— ✦ {str(count).zfill(3)} ✦ ———**\n\n📁 **Title:** `{name1}.zip`\n📚 **Course:** `{b_name}`\n\n⚡ **Extracted By:** {CR}"
+                cc1 = (
+                    f"**Index**: {str(count).zfill(3)}\n"
+                    f"**Title**: {name1}.pdf\n"
+                    f"**Batch**: {b_name}\n"
+                    f"**Uploaded By**: {CR}"
+                )
+                # ccimg = f"**╭━━━━ IMAGE ━━━━╮**\n💫 **Image ID:** `{str(count).zfill(3)}`\n**╰━━━━━━━━━━━━━━╯**\n\n📁 **Title:** `{name1} lucifer.JPG`\n📚 **Course:** `{b_name}`\n\n⚡ **Downloaded By:** {CR}"
+                # ccm = f"**——— ✦ {str(count).zfill(3)} ✦ ———**\n\n🎵 **Title:** `{name1}.mp3`\n📚 **Course:** `{b_name}`\n\n⚡ **Extracted By:** {CR}"
+                # cchtml = f"**——— ✦ {str(count).zfill(3)} ✦ ———**\n\n🌐 **Title:** `{name1}.html`\n📚 **Course:** `{b_name}`\n\n⚡ **Extracted By:** {CR}"
+                ccimg = (
+                    f"**Title**: {name1}.jpg\n"
+                )
+                ccm = (
+                    f"**Index**: {str(count).zfill(3)}\n"
+                    f"**Title**: {name1}.mp3\n"
+                    f"**Batch**: {b_name}\n"
+                    f"**Uploaded By**: {CR}"
+                )
+                cchtml = (
+                    f"**Index**: {str(count).zfill(3)}\n"
+                    f"**Title**: {name1}.html\n"
+                    f"**Batch**: {b_name}\n"
+                    f"**Uploaded By**: {CR}"
+                )
     
                 if "drive" in url:
                     try:
@@ -785,6 +773,6 @@ async def txt_handler(bot: Client, m: Message):
 
     except Exception as e:
         await m.reply_text(str(e))                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 
-    await m.reply_text("**Sᴜᴄᴄᴇsғᴜʟʟʏ Dᴏᴡɴʟᴏᴀᴅᴇᴅ Aʟʟ Lᴇᴄᴛᴜʀᴇs SIR 👿🚀**")               
+    await m.reply_text("DONE ✅")               
                  
 bot.run()
