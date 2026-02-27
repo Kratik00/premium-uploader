@@ -40,8 +40,8 @@ import aiofiles
 import zipfile
 import shutil
 import ffmpeg
-import pytz, datetime
-from datetime import datetime, timezone
+from datetime import datetime, timedelta
+import pytz
 from motor.motor_asyncio import AsyncIOMotorClient
 
 mongo = AsyncIOMotorClient(MONGO_URL)
@@ -169,12 +169,12 @@ async def check_premium_user(user_id: int):
     return await premium_db.find_one({"_id": user_id})
 
 
-# 🔹 Get All Premium Users (cursor)
+# 🔹 Get All Premium Users
 def get_all_premium():
     return premium_db.find({})
 
 
-# 🔹 Boolean Premium Check (MAIN FUNCTION YOU SHOULD USE)
+# 🔹 Boolean Premium Check (Main Logic)
 async def is_premium_user(user_id: int) -> bool:
     user = await premium_db.find_one({"_id": user_id})
 
@@ -182,24 +182,31 @@ async def is_premium_user(user_id: int) -> bool:
         return False
 
     expire_date = user.get("expire_date")
-
     if not expire_date:
         return False
 
-    # 🔥 Convert both to naive UTC
+    # Convert both to naive UTC
     now = datetime.utcnow()
+    expire_date = expire_date.replace(tzinfo=None)
 
-    if expire_date.replace(tzinfo=None) < now:
+    if expire_date < now:
+        # Auto remove expired user
         await premium_db.delete_one({"_id": user_id})
         return False
 
     return True
 
+
+# 🔹 Premium Access Check (Private + Admin Based)
 async def check_premium_access(bot: Client, m: Message):
 
+    # Private Chat
     if m.chat.type == ChatType.PRIVATE:
+        if not m.from_user:
+            return False
         return await is_premium_user(m.from_user.id)
 
+    # Group / Supergroup / Channel
     try:
         async for admin in bot.get_chat_members(
             m.chat.id,
@@ -256,11 +263,17 @@ async def add_premium_cmd(client, message):
     uid = int(message.command[1])
     days = int(message.command[2])
 
-    expire = datetime.datetime.utcnow() + datetime.timedelta(days=days)
+    # Store as naive UTC
+    expire = datetime.utcnow() + timedelta(days=days)
 
     await add_premium_user(uid, expire)
 
-    expire_ist = expire.astimezone(pytz.timezone("Asia/Kolkata")).strftime("%d-%m-%Y %I:%M %p")
+    # Convert for display (attach UTC tz first)
+    expire_ist = (
+        expire.replace(tzinfo=pytz.utc)
+        .astimezone(pytz.timezone("Asia/Kolkata"))
+        .strftime("%d-%m-%Y %I:%M %p")
+    )
 
     await message.reply(f"⭐ Premium given to `{uid}`\nExpires: `{expire_ist}`")
 
@@ -268,8 +281,6 @@ async def add_premium_cmd(client, message):
         await client.send_message(uid, f"🔥 You are now premium till {expire_ist}")
     except:
         pass
-
-
 
 @bot.on_message(filters.command("remove_premium"))
 async def remove_premium_cmd(client, message):
@@ -285,12 +296,11 @@ async def remove_premium_cmd(client, message):
     await remove_premium_user(uid)
 
     await message.reply("Removed successfully.")
+
     try:
         await client.send_message(uid, "Your premium is removed.")
     except:
         pass
-
-
 
 @bot.on_message(filters.command("premium_users"))
 async def premium_users_cmd(client, message):
@@ -298,21 +308,26 @@ async def premium_users_cmd(client, message):
     if message.from_user.id != OWNER_ID:
         return await message.reply("Only owner can use this.")
 
-    users = await get_all_premium()
-    text = "👑 **ACTIVE PREMIUM USERS:**\n\n"
-    c = 0
+    cursor = get_all_premium()
+    users = await cursor.to_list(length=None)
 
-    for u in users:
-        c += 1
-        exp = u["expire_date"].astimezone(pytz.timezone("Asia/Kolkata")).strftime("%d-%m-%Y %I:%M %p")
-        text += f"{c}. `{u['_id']}`\n⏳ Till: `{exp}`\n\n"
-
-    if c == 0:
+    if not users:
         return await message.reply("No premium users.")
 
+    text = "👑 **ACTIVE PREMIUM USERS:**\n\n"
+
+    for i, u in enumerate(users, start=1):
+        expire = u["expire_date"]
+
+        expire_ist = (
+            expire.replace(tzinfo=pytz.utc)
+            .astimezone(pytz.timezone("Asia/Kolkata"))
+            .strftime("%d-%m-%Y %I:%M %p")
+        )
+
+        text += f"{i}. `{u['_id']}`\n⏳ Till: `{expire_ist}`\n\n"
+
     await message.reply(text)
-
-
 
 @bot.on_message(filters.command("chk_premium"))
 async def chk_premium_cmd(client, message):
@@ -327,9 +342,16 @@ async def chk_premium_cmd(client, message):
     if not data:
         return await message.reply("Not premium.")
 
-    exp = data["expire_date"].astimezone(pytz.timezone("Asia/Kolkata")).strftime("%d-%m-%Y %I:%M %p")
+    expire = data["expire_date"]
 
-    await message.reply(f"YES PREMIUM\nTill `{exp}`")
+    expire_ist = (
+        expire.replace(tzinfo=pytz.utc)
+        .astimezone(pytz.timezone("Asia/Kolkata"))
+        .strftime("%d-%m-%Y %I:%M %p")
+    )
+
+    await message.reply(f"YES PREMIUM\nTill `{expire_ist}`")
+
 
 @bot.on_message(filters.command(["t2t"]))
 async def text_to_txt(client, message: Message):
