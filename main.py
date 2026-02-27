@@ -598,55 +598,6 @@ async def info(bot: Client, update: Message):
         reply_markup=BUTTONSCONTACT
     )
 
-@bot.on_message(filters.command(["help"]))
-async def txt_handler(client, m):
-    await bot.send_message(
-        m.chat.id,
-        text=(
-            "⚡ **Command Menu**\n"
-            "Everything you need, straight and simple.\n\n"
-            "🔹 **/start** – Check bot status\n"
-            "🔹 **/upload** – Upload a TXT file\n"
-            "🔹 **/y2t** – YouTube ➜ TXT\n"
-            "🔹 **/t2t** – Text ➜ Text processing\n"
-            "🔹 **/logs** – View logs\n"
-            "🔹 **/cookies** – Update YouTube cookies\n"
-            "🔹 **/id** – Get your ID\n"
-            "🔹 **/info** – User info\n"
-            "🔹**/restart** – If bot stucks "
-            "🔹 **/stop** – Stop current task\n"
-            "📞 **Support:** @NOOBHUSIR\n"
-            "⚙️ Stay sharp. More updates coming."
-        )
-    )
-
-
-@bot.on_message(filters.command(["logs"]))
-async def send_logs(client: Client, m: Message):  # Correct parameter name
-    try:
-        with open("logs.txt", "rb") as file:
-            sent = await m.reply_text("**📤 Sending you ....**")
-            await m.reply_document(document=file)
-            await sent.delete()
-    except Exception as e:
-        await m.reply_text(f"Error sending logs: {e}")
-
-def safe_json(response):
-    try:
-        if response is None:
-            return None
-
-        if response.status_code != 200:
-            return None
-
-        text = response.text.strip()
-        if not text or not text.startswith("{"):
-            return None
-
-        return response.json()
-    except Exception:
-        return None
-
 @bot.on_message(filters.command(["upload"]))
 async def txt_handler(bot: Client, m: Message):
 
@@ -655,6 +606,11 @@ async def txt_handler(bot: Client, m: Message):
             "**❌ Premium Required**\n\n"
             "This feature is only available for premium users."
         )
+
+    try:
+        await m.delete()
+    except:
+        pass
 
     editable = await m.reply_text("**⚡𝗦𝖾𝗇𝖽 𝗧𝗑𝗍 𝗙𝗂𝗅𝖾⚡**")
 
@@ -701,83 +657,88 @@ async def txt_handler(bot: Client, m: Message):
         os.remove(x)
         return
     
-    await editable.edit(f"`🔹Total 🔗 links found are {len(links)}\n\n🔹Img : {img_count}  🔹PDF : {pdf_count}\n🔹ZIP : {zip_count}  🔹Other : {other_count}\n\n🔹Send From where you want to download.`")
-    input0: Message = await bot.listen(editable.chat.id)
-    raw_text = input0.text
-    await input0.delete(True)
-           
-    await editable.edit("`🔹Enter Your Batch Name\n🔹Send 1 for use default.`")
-    input1: Message = await bot.listen(editable.chat.id)
-    raw_text0 = input1.text
-    await input1.delete(True)
-    if raw_text0 == '1':
+    await editable.edit(
+        f"🔹Total Links: {len(links)}\n\n"
+        "📥 Send All Details In ONE Message (6 Lines):\n\n"
+        "1️⃣ Start Index\n"
+        "2️⃣ Batch Name (or 1)\n"
+        "3️⃣ Quality (144/240/360/480/720/1080)\n"
+        "4️⃣ Your Name (or 1)\n"
+        "5️⃣ PW Token (or /anything)\n"
+        "6️⃣ Thumb URL (or /d or No)\n\n"
+    )
+    try:
+        input_all: Message = await bot.listen(
+            editable.chat.id,
+            filters=filters.user(m.from_user.id),
+            timeout=180
+        )
+    except asyncio.TimeoutError:
+        await editable.delete()
+        return await m.reply_text("⏰ Session expired. Use /upload again.")
+        
+    if input_all.text.lower() in ["/cancel", "cancel"]:
+        await editable.delete()
+        return await m.reply_text("❌ Upload cancelled.")
+        
+    data = input_all.text.strip().split("\n")
+    await input_all.delete(True)
+    
+    if len(data) < 6:
+        await editable.delete()
+        return await m.reply_text("❌ Invalid format. Send exactly 6 lines.")
+        
+    raw_text = data[0].strip()
+    raw_text0 = data[1].strip()
+    raw_text2 = data[2].strip()
+    raw_text3 = data[3].strip()
+    raw_text4 = data[4].strip()
+    raw_text6 = data[5].strip()
+    
+    count = int(raw_text)
+    arg = int(raw_text)
+    
+    if raw_text0 == "1":
         b_name = file_name.replace('_', ' ')
     else:
         b_name = raw_text0
-
-    await editable.edit(
-        "⚡ **Choose your video quality**\n\n"
-        "🔹 Send `144` – Low\n"
-        "🔹 Send `240` – Basic\n"
-        "🔹 Send `360` – Medium\n"
-        "🔹 Send `480` – SD\n"
-        "🔹 Send `720` – HD\n"
-        "🔹 Send `1080` – Full HD\n\n"
-        "💠 **Reply with a number.**"
-)
-
-
-    input2: Message = await bot.listen(editable.chat.id)
-    raw_text2 = input2.text
+        
     quality = f"{raw_text2}p"
-    await input2.delete(True)
-    try:
-        if raw_text2 == "144":
-            res = "256x144"
-        elif raw_text2 == "240":
-            res = "426x240"
-        elif raw_text2 == "360":
-            res = "640x360"
-        elif raw_text2 == "480":
-            res = "854x480"
-        elif raw_text2 == "720":
-            res = "1280x720"
-        elif raw_text2 == "1080":
-            res = "1920x1080" 
-        else: 
-            res = "UN"
-    except Exception:
-            res = "UN"
-
-    await editable.edit("`🔹Enter Your Name\n🔹Send 1 for use default`")
-    input3: Message = await bot.listen(editable.chat.id)
-    raw_text3 = input3.text
-    await input3.delete(True)
-    if raw_text3 == '1':
+    quality_map = {
+        "144": "256x144",
+        "240": "426x240",
+        "360": "640x360",
+        "480": "854x480",
+        "720": "1280x720",
+        "1080": "1920x1080"
+    }
+    
+    res = quality_map.get(raw_text2, "UN")
+    
+    if raw_text3 == "1":
         CR = '[LUCIFER](https://t.me/NOOBHUSIR)'
     else:
         CR = raw_text3
-
-    await editable.edit("🔹Enter Your PW Token For 𝐌𝐏𝐃 𝐔𝐑𝐋\n🔹Send /anything for use default")
-    input4: Message = await bot.listen(editable.chat.id)
-    raw_text4 = input4.text
-    await input4.delete(True)
-
-    await editable.edit(f"🔹Send the Video Thumb URL\n🔹Send /d for use default\n\n🔹You can direct upload thumb\n🔹Send **No** for use default")
-    input6 = message = await bot.listen(editable.chat.id)
-    raw_text6 = input6.text
-    await input6.delete(True)
-
-    if input6.photo:
-        thumb = await input6.download()  # Use the photo sent by the user
+        
+    if raw_text6.lower() == "no" or raw_text6 == "/d":
+        thumb = None
     elif raw_text6.startswith("http://") or raw_text6.startswith("https://"):
-        # If a URL is provided, download thumbnail from the URL
         getstatusoutput(f"wget '{raw_text6}' -O 'thumb.jpg'")
         thumb = "thumb.jpg"
     else:
         thumb = raw_text6
+        
     await editable.delete()
-    await m.reply_text(f"__**🎯Target Batch : {b_name}**__")
+    sent_msg = await bot.send_message(
+        m.chat.id,
+        f"__**🎯Target Batch : {b_name}**__"
+    )
+    
+    if m.chat.type != ChatType.PRIVATE:
+        try:
+            await sent_msg.pin(disable_notification=True)
+        except:
+            pass
 
     failed_count = 0
     count =int(raw_text)    
