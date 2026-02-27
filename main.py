@@ -264,7 +264,7 @@ async def txt_handler(bot: Client, m: Message):
     except:
         pass
 
-    editable = await m.reply_text("S𝖾𝗇𝖽 T𝗑𝗍 f𝗂𝗅𝖾 To Download!")
+    editable = await m.reply_text("**S𝖾𝗇𝖽 T𝗑𝗍 f𝗂𝗅𝖾 To Download!**")
 
     input_msg: Message = await bot.listen(editable.chat.id)
 
@@ -310,7 +310,7 @@ async def txt_handler(bot: Client, m: Message):
         return
     
     await editable.edit(
-        f"🧾 Enter input in the following lines:"
+        f"🧾 Enter input in the following lines:\n\n"
         "1️⃣ Index (e.g. 1 or 1-{len(links)})\n"
         "2️⃣ Batch name (0 to skip)\n"
         "3️⃣ Resolution (360/480/720)\n"
@@ -333,7 +333,7 @@ async def txt_handler(bot: Client, m: Message):
     data = input_all.text.strip().split("\n")
     await input_all.delete(True)
     
-    if len(data) < 6:
+    if len(data) < 4:
         await editable.delete()
         return await m.reply_text("❌ __Invalid format.__")
         
