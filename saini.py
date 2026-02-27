@@ -350,14 +350,21 @@ async def download_and_decrypt_video(url, cmd, name, key):
 
 async def send_vid(bot: Client, m: Message, cc, filename, thumb, name):
 
+    # 🔹 Generate thumbnail at 2 seconds (safer than 10s)
+    subprocess.run(
+        f'ffmpeg -i "{filename}" -ss 00:00:10 -vframes 1 "{filename}.jpg"',
+        shell=True
+    )
+
+    thumbnail = None
+    if os.path.exists(f"{filename}.jpg"):
+        thumbnail = f"{filename}.jpg"
+
+    # 🔹 Get duration safely
     try:
         dur = int(duration(filename))
     except:
         dur = None
-
-    # If thumb is invalid or None, force None
-    
-    thumb = None
 
     try:
         await m.reply_video(
@@ -365,10 +372,11 @@ async def send_vid(bot: Client, m: Message, cc, filename, thumb, name):
             caption=cc,
             supports_streaming=True,
             duration=dur,
-            thumb=thumb  # 🔥 can be None safely
+            thumb=thumbnail
         )
 
     except Exception:
+        # fallback if video fails
         await m.reply_document(
             filename,
             caption=cc
@@ -377,3 +385,6 @@ async def send_vid(bot: Client, m: Message, cc, filename, thumb, name):
     finally:
         if os.path.exists(filename):
             os.remove(filename)
+
+        if thumbnail and os.path.exists(thumbnail):
+            os.remove(thumbnail)
