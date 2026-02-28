@@ -47,6 +47,9 @@ from motor.motor_asyncio import AsyncIOMotorClient
 mongo = AsyncIOMotorClient(MONGO_URL)
 premium_db = mongo["premiumbot"]["premiumbot_users"]
 
+mongo_db = AsyncIOMotorClient(MONGOURL)
+media_db = mongo_db["media_cache"]["media_files"]
+
 # Initialize the bot
 bot = Client(
     "bot",
@@ -479,8 +482,6 @@ async def txt_handler(bot: Client, m: Message):
             elif "/khansirvod4" in url and "akamaized" in url:
                  url = url.replace(url.split("/")[-1], raw_text2+".m3u8")
  
-
-# --- Unified Classplus/Testbook handler using ITSGOLU API ---
             if any(x in url for x in ["https://cpvod.testbook.com/", "classplusapp.com/drm/", "media-cdn.classplusapp.com", "media-cdn-alisg.classplusapp.com", "media-cdn-a.classplusapp.com", "tencdn.classplusapp", "videos.classplusapp", "webvideos.classplusapp.com"]):
                 # normalize cpvod -> media-cdn path used by API
                 url_norm = url.replace("https://cpvod.testbook.com/", "https://media-cdn.classplusapp.com/drm/")
@@ -506,9 +507,6 @@ async def txt_handler(bot: Client, m: Message):
                         print("✅ Non-DRM Content - Got direct URL")
 
                     else:
-                        # Unexpected response format
-                        await m.reply_text("⚠️ API returned unexpected response, attempting fallback...")
-                        # Try helper fallback that used to work for drm-only endpoints
                         try:
                             res = helper.get_mps_and_keys2(url_norm)
                             if res:
@@ -677,9 +675,16 @@ async def txt_handler(bot: Client, m: Message):
                             cmd = f'yt-dlp -o "{name}.pdf" "{url}"'
                             download_cmd = f"{cmd} -R 25 --fragment-retries 25"
                             os.system(download_cmd)
-                            copy = await bot.send_document(chat_id=m.chat.id, document=f'{name}.pdf', caption=cc1)
+                            sent = await helper.send_doc(bot, m, file_path, caption)
+                            file_id = None
+                            file_type = None
+                            if sent.video:
+                                file_id = sent.video.file_id
+                                file_type = "video"
+                            elif sent.document:
+                                file_id = sent.document.file_id
+                                file_type = "document"
                             count += 1
-                            os.remove(f'{name}.pdf')
                         except FloodWait as e:
                             await m.reply_text(str(e))
                             time.sleep(e.x)
@@ -727,7 +732,7 @@ async def txt_handler(bot: Client, m: Message):
                         await asyncio.sleep(e.x)
                         continue
                     except Exception as e:
-                        await m.reply_text(f"⚠️ Error: {e}")
+                        await m.reply_text(f"Error: {e}")
 
 
 
@@ -749,26 +754,52 @@ async def txt_handler(bot: Client, m: Message):
                 elif 'encrypted.m' in url:
                     res_file = await helper.download_and_decrypt_video(url, cmd, name, appxkey)
                     if res_file:
-                        await helper.send_vid(bot, m, cc, res_file, name)
+                        sent = await helper.send_vid(bot, m, cc, res_file, name)
+                        file_id = None
+                        file_type = None
+                        if sent.video:
+                            file_id = sent.video.file_id
+                            file_type = "video"
+                        elif sent.document:
+                            file_id = sent.document.file_id
+                            file_type = "document"
                         count += 1
                     continue
                 
                 elif 'drmcdni' in url or 'drm/wv' in url or 'drm/common' in url:
                     res_file = await helper.decrypt_and_merge_video(mpd, keys_string, path, name, raw_text2)
                     if res_file:
-                        await helper.send_vid(bot, m, cc, res_file, name)
-                        count += 1    
+                        sent = await helper.send_vid(bot, m, cc, res_file, name)
+                        file_id = None
+                        file_type = None
+                        if sent.video:
+                            file_id = sent.video.file_id
+                            file_type = "video"
+                        elif sent.document:
+                            file_id = sent.document.file_id
+                            file_type = "document"
+                        count += 1   
                     continue
                 
                 else:
                     res_file = await helper.download_video(url, cmd, name)
                     if res_file:
-                        await helper.send_vid(bot, m, cc, res_file, name)
+                        sent = await helper.send_vid(bot, m, cc, res_file, name)
+                        file_id = None
+                        file_type = None
+                        if sent.video:
+                            file_id = sent.video.file_id
+                            file_type = "video"
+                        elif sent.document:
+                            file_id = sent.document.file_id
+                            file_type = "document"
                         count += 1
                     continue
             
             except Exception as e:
-                await m.reply_text(str(e))
+                await m.reply_text(
+                    f"**Index**: {str(count).zfill(3)}\n\n\**Title**: {name1}\n\n**Batch**: {b_name}\n\n**Link**: {url}\n\n**Error**: {str(e)}"
+                )
                 continue
 
     except Exception as e:
