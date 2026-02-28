@@ -59,6 +59,7 @@ bot = Client(
 )
 
 processing_request = False
+cancel_flags = {}
 cookies_file_path = os.getenv("cookies_file_path", "youtube_cookies.txt")
 api_url = "http://master-api-v3.vercel.app/"
 api_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNzkxOTMzNDE5NSIsInRnX3VzZXJuYW1lIjoi4p61IFtvZmZsaW5lXSIsImlhdCI6MTczODY5MjA3N30.SXzZ1MZcvMp5sGESj0hBKSghhxJ3k1GTWoBUbivUe1I"
@@ -68,6 +69,12 @@ photologo = 'https://tinypic.host/images/2025/02/07/DeWatermark.ai_1738952933236
 photoyt = 'https://tinypic.host/images/2025/03/18/YouTube-Logo.wine.png' #https://envs.sh/GVi.jpg
 photocp = 'https://tinypic.host/images/2025/03/28/IMG_20250328_133126.jpg'
 photozip = 'https://envs.sh/cD_.jpg'
+
+
+@bot.on_startup()
+async def startup():
+    await media_db.create_index("media_url", unique=True)
+
 
 # 🔹 Add / Update Premium
 async def add_premium_user(user_id: int, expire: datetime):
@@ -249,10 +256,19 @@ async def premium_users_cmd(client, message):
 
     await message.reply(text)
     
-@bot.on_message(filters.command(["stop"]) )
-async def restart_handler(_, m):
-    await m.reply_text("Task Cancelled", True)
-    os.execl(sys.executable, sys.executable, *sys.argv)
+# @bot.on_message(filters.command(["stop"]) )
+# async def restart_handler(_, m):
+#     await m.reply_text("Task Cancelled", True)
+#     os.execl(sys.executable, sys.executable, *sys.argv)
+
+@bot.on_message(filters.command(["stop"]))
+async def stop_handler(_, m):
+    if m.chat.id in cancel_flags:
+        cancel_flags[m.chat.id] = True
+        await m.reply_text("Stopping your task....")
+    else:
+        await m.reply_text("__No Active Task Running__")
+
 
 @bot.on_message(filters.command(["upload"]))
 async def txt_handler(bot: Client, m: Message):
@@ -261,6 +277,8 @@ async def txt_handler(bot: Client, m: Message):
         return await m.reply_text(
             "❌ __Unauthorised Attempt Detected.__"
         )
+
+    cancel_flags[m.chat.id] = False
 
     try:
         await m.delete()
@@ -390,6 +408,10 @@ async def txt_handler(bot: Client, m: Message):
     arg = int(raw_text)
     try:
         for i in range(arg-1, len(links)):
+
+            if cancel_flags.get(m.chat.id):
+                await m.reply_text("Task Stopped")
+                break
             Vxy = links[i][1].replace("file/d/","uc?export=download&id=").replace("www.youtube-nocookie.com/embed", "youtu.be").replace("?modestbranding=1", "").replace("/view?usp=sharing","")
             url = "https://" + Vxy
             link0 = "https://" + Vxy
@@ -887,7 +909,7 @@ async def txt_handler(bot: Client, m: Message):
                                     },
                                        upsert= True
                                 )
-                             except Exception as db_error:
+                            except Exception as db_error:
                                 print("Mongo Save Error:", db_error)
                         count += 1
                     continue
@@ -899,7 +921,9 @@ async def txt_handler(bot: Client, m: Message):
                 continue
 
     except Exception as e:
-        await m.reply_text(str(e))                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 
+        await m.reply_text(str(e))   
+
+    cancel_flags.pop(m.chat.id, None)
     await m.reply_text("DONE ✅")               
                  
 bot.run()
