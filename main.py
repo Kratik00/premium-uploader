@@ -21,7 +21,7 @@ from logs import logging
 from bs4 import BeautifulSoup
 import saini as helper
 from utils import progress_bar
-from vars import API_ID, API_HASH, BOT_TOKEN, OWNER_ID, MONGO_URL
+from vars import API_ID, API_HASH, BOT_TOKEN, OWNER_ID, MONGO_URL, MONGOURL
 from aiohttp import ClientSession
 from subprocess import getstatusoutput
 from pytube import YouTube
@@ -137,6 +137,7 @@ async def check_premium_access(bot: Client, m: Message):
         return False
 
     return False
+    
 @bot.on_message(filters.command("cookies") & filters.private)
 async def cookies_handler(client: Client, m: Message):
     await m.reply_text(
@@ -145,7 +146,6 @@ async def cookies_handler(client: Client, m: Message):
     )
 
     try:
-        # Wait for the user to send the cookies file
         input_message: Message = await client.listen(m.chat.id)
 
         # Validate the uploaded file
@@ -396,6 +396,8 @@ async def txt_handler(bot: Client, m: Message):
 
             name1 = links[i][0].replace("(", "[").replace(")", "]").replace("_", "").replace("\t", "").replace(":", "").replace("/", "").replace("+", "").replace("#", "").replace("|", "").replace("@", "").replace("*", "").replace(".", "").replace("https", "").replace("http", "").strip()
             name = f'{name1[:60]}'
+            
+            media_url = url.split("?")[0]
             
             if "visionias" in url:
                 async with ClientSession() as session:
@@ -675,7 +677,7 @@ async def txt_handler(bot: Client, m: Message):
                             cmd = f'yt-dlp -o "{name}.pdf" "{url}"'
                             download_cmd = f"{cmd} -R 25 --fragment-retries 25"
                             os.system(download_cmd)
-                            sent = await helper.send_doc(bot, m, file_path, caption)
+                            sent = await helper.send_doc(bot, m, f"{name}.pdf", cc1)
                             file_id = None
                             file_type = None
                             if sent.video:
@@ -684,6 +686,20 @@ async def txt_handler(bot: Client, m: Message):
                             elif sent.document:
                                 file_id = sent.document.file_id
                                 file_type = "document"
+                                if file_id:
+                                    await media_db.update.one(
+                                        {
+                                            "media_url": media_url
+                                        },
+                                        {
+                                            "$set":{
+                                                "file_id": file_id,
+                                                "file_type": file_type,
+                                                "created_at": datetime.utcnow()
+                                            }
+                                        },
+                                        upsert= True
+                                    )
                             count += 1
                         except FloodWait as e:
                             await m.reply_text(str(e))
@@ -763,6 +779,20 @@ async def txt_handler(bot: Client, m: Message):
                         elif sent.document:
                             file_id = sent.document.file_id
                             file_type = "document"
+                            if file_id:
+                                await media_db.update.one(
+                                    {
+                                        "media_url": media_url
+                                    },
+                                    {
+                                        "$set":{
+                                            "file_id": file_id,
+                                            "file_type": file_type,
+                                            "created_at": datetime.utcnow()
+                                         }
+                                    },
+                                       upsert= True
+                                )
                         count += 1
                     continue
                 
@@ -778,6 +808,20 @@ async def txt_handler(bot: Client, m: Message):
                         elif sent.document:
                             file_id = sent.document.file_id
                             file_type = "document"
+                            if file_id:
+                                await media_db.update.one(
+                                    {
+                                        "media_url": media_url
+                                    },
+                                    {
+                                        "$set":{
+                                            "file_id": file_id,
+                                            "file_type": file_type,
+                                            "created_at": datetime.utcnow()
+                                        }
+                                    },
+                                    upsert= True
+                                )
                         count += 1   
                     continue
                 
@@ -793,6 +837,20 @@ async def txt_handler(bot: Client, m: Message):
                         elif sent.document:
                             file_id = sent.document.file_id
                             file_type = "document"
+                            if file_id:
+                                await media_db.update.one(
+                                    {
+                                       "media_url": media_url
+                                    },
+                                    {
+                                        "$set":{
+                                            "file_id": file_id,
+                                            "file_type": file_type,
+                                            "created_at": datetime.utcnow()
+                                        }
+                                    },
+                                    upsert= True
+                                )
                         count += 1
                     continue
             
