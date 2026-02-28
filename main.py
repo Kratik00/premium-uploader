@@ -47,7 +47,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 mongo = AsyncIOMotorClient(MONGO_URL)
 premium_db = mongo["premiumbot"]["premiumbot_users"]
 
-mongo_db = AsyncIOMotorClient(MONGOURL)
+mongo_db = AsyncIOMotorClient(MONGO_URL)
 media_db = mongo_db["media_cache"]["media_files"]
 
 # Initialize the bot
