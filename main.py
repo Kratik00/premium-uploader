@@ -70,12 +70,6 @@ photoyt = 'https://tinypic.host/images/2025/03/18/YouTube-Logo.wine.png' #https:
 photocp = 'https://tinypic.host/images/2025/03/28/IMG_20250328_133126.jpg'
 photozip = 'https://envs.sh/cD_.jpg'
 
-
-@bot.on_startup()
-async def startup():
-    await media_db.create_index("media_url", unique=True)
-
-
 # 🔹 Add / Update Premium
 async def add_premium_user(user_id: int, expire: datetime):
     await premium_db.update_one(
