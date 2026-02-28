@@ -50,6 +50,8 @@ premium_db = mongo["premiumbot"]["premiumbot_users"]
 mongo_db = AsyncIOMotorClient(MONGOURL)
 media_db = mongo_db["media_cache"]["media_files"]
 
+await media_db.create_index("media_url", unique=True)
+
 # Initialize the bot
 bot = Client(
     "bot",
@@ -398,6 +400,32 @@ async def txt_handler(bot: Client, m: Message):
             name = f'{name1[:60]}'
             
             media_url = url.split("?")[0]
+
+            cached = await media_db.find_one({"media_url": media_url})
+            if cached:
+                print("using cache........")
+
+                cc = (
+                    f"**Index**: {str(count).zfill(3)}\n\n"
+                    f"**Title**: {name1}.mp4\n\n"
+                    f"**Batch**: {b_name}\n\n"
+                    f"**Uploaded By**: {CR}"
+                )
+                cc1 = (
+                    f"**Index**: {str(count).zfill(3)}\n\n"
+                    f"**Title**: {name1}.pdf\n\n"
+                    f"**Batch**: {b_name}\n\n"
+                    f"**Uploaded By**: {CR}"
+                )
+                if cached["file_type"] == "video":
+                    await bot.send_video(m.chat.id, cached["file_id"], caption=cc)
+                else:
+                    await bot.send_document(m.chat.id, cached["file_id"], caption=cc1)
+
+
+                count +=1
+                continue
+                
             
             if "visionias" in url:
                 async with ClientSession() as session:
@@ -687,19 +715,22 @@ async def txt_handler(bot: Client, m: Message):
                                 file_id = sent.document.file_id
                                 file_type = "document"
                                 if file_id:
-                                    await media_db.update.one(
-                                        {
-                                            "media_url": media_url
-                                        },
-                                        {
-                                            "$set":{
-                                                "file_id": file_id,
-                                                "file_type": file_type,
-                                                "created_at": datetime.utcnow()
-                                            }
-                                        },
-                                        upsert= True
-                                    )
+                                    try:
+                                        await media_db.update.one(
+                                            {
+                                                "media_url": media_url
+                                            },
+                                            {
+                                                "$set":{
+                                                    "file_id": file_id,
+                                                    "file_type": file_type,
+                                                    "created_at": datetime.utcnow()
+                                                }
+                                            },
+                                            upsert= True
+                                        )
+                                    except Exception as db_error:
+                                        print("Mongo Save Error:", db_error")
                             count += 1
                         except FloodWait as e:
                             await m.reply_text(str(e))
@@ -780,19 +811,22 @@ async def txt_handler(bot: Client, m: Message):
                             file_id = sent.document.file_id
                             file_type = "document"
                             if file_id:
-                                await media_db.update.one(
-                                    {
-                                        "media_url": media_url
-                                    },
-                                    {
-                                        "$set":{
-                                            "file_id": file_id,
-                                            "file_type": file_type,
-                                            "created_at": datetime.utcnow()
-                                         }
-                                    },
-                                       upsert= True
-                                )
+                                try:
+                                    await media_db.update.one(
+                                        {
+                                            "media_url": media_url
+                                        },
+                                        {
+                                            "$set":{
+                                                "file_id": file_id,
+                                                "file_type": file_type,
+                                                "created_at": datetime.utcnow()
+                                             }
+                                        },
+                                           upsert= True
+                                    )
+                                except Exception as db_error:
+                                    print("Mongo Save Error:", db_error)
                         count += 1
                     continue
                 
@@ -809,19 +843,22 @@ async def txt_handler(bot: Client, m: Message):
                             file_id = sent.document.file_id
                             file_type = "document"
                             if file_id:
-                                await media_db.update.one(
-                                    {
-                                        "media_url": media_url
-                                    },
-                                    {
-                                        "$set":{
-                                            "file_id": file_id,
-                                            "file_type": file_type,
-                                            "created_at": datetime.utcnow()
-                                        }
-                                    },
-                                    upsert= True
-                                )
+                                try:
+                                    await media_db.update.one(
+                                        {
+                                            "media_url": media_url
+                                        },
+                                        {
+                                            "$set":{
+                                                "file_id": file_id,
+                                                "file_type": file_type,
+                                                "created_at": datetime.utcnow()
+                                             }
+                                        },
+                                           upsert= True
+                                    )
+                                except Exception as db_error:
+                                    print("Mongo Save Error:", db_error)
                         count += 1   
                     continue
                 
@@ -838,19 +875,22 @@ async def txt_handler(bot: Client, m: Message):
                             file_id = sent.document.file_id
                             file_type = "document"
                             if file_id:
-                                await media_db.update.one(
-                                    {
-                                       "media_url": media_url
-                                    },
-                                    {
-                                        "$set":{
-                                            "file_id": file_id,
-                                            "file_type": file_type,
-                                            "created_at": datetime.utcnow()
-                                        }
-                                    },
-                                    upsert= True
-                                )
+                                try:
+                                    await media_db.update.one(
+                                        {
+                                            "media_url": media_url
+                                        },
+                                        {
+                                            "$set":{
+                                                "file_id": file_id,
+                                                "file_type": file_type,
+                                                "created_at": datetime.utcnow()
+                                             }
+                                        },
+                                           upsert= True
+                                    )
+                                except Exception as db_error:
+                                    print("Mongo Save Error:", db_error)
                         count += 1
                     continue
             
