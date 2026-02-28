@@ -435,6 +435,7 @@ async def txt_handler(bot: Client, m: Message):
                     await bot.send_video(m.chat.id, cached["file_id"], caption=cc)
                 else:
                     await bot.send_document(m.chat.id, cached["file_id"], caption=cc1)
+                await asyncio.sleep(0.4)
 
 
                 count +=1
@@ -615,6 +616,17 @@ async def txt_handler(bot: Client, m: Message):
                 ytf = f"bestvideo[height<={raw_text2}]+bestaudio/best[height<={raw_text2}]"
             else:
                 ytf = f"b[height<={raw_text2}]/bv[height<={raw_text2}]+ba/b/bv+ba"
+
+            if "playlist.m3u8" in url:
+                live = await helper.is_live_stream(url)
+
+            if live:
+                await m.reply_text(
+                    f"**Index**: {str(count).zfill(3)}\n\n\**Title**: {name1}\n\n**Batch**: {b_name}\n\n**Link**: {url}\n\n**Error**: Live Stream Detetcted - SKIPPED"
+                )
+                count += 1
+                continue
+                    
            
             if "jw-prod" in url:
                 cmd = f'yt-dlp -o "{name}.mp4" "{url}"'
