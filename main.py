@@ -625,7 +625,7 @@ async def txt_handler(bot: Client, m: Message):
                 live = await helper.is_live_stream(url)
                 if live:
                     await m.reply_text(
-                        f"**Index**: {str(count).zfill(3)}\n\n\**Title**: {name1}\n\n**Batch**: {b_name}\n\n**Link**: {url}\n\n**Error**: Live Stream Detetcted - SKIPPED"
+                        f"**Index**: {str(count).zfill(3)}\n\n**Title**: {name1}\n\n**Batch**: {b_name}\n\n**Link**: {url}\n\n**Error**: Live Stream Detetcted - SKIPPED"
                     )
                     count += 1
                     continue
@@ -925,7 +925,7 @@ async def txt_handler(bot: Client, m: Message):
             
             except Exception as e:
                 await m.reply_text(
-                    f"**Index**: {str(count).zfill(3)}\n\n\**Title**: {name1}\n\n**Batch**: {b_name}\n\n**Link**: {url}\n\n**Error**: {str(e)}"
+                    f"**Index**: {str(count).zfill(3)}\n\n**Title**: {name1}\n\n**Batch**: {b_name}\n\n**Link**: {url}\n\n**Error**: {str(e)}"
                 )
                 continue
 
