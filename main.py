@@ -431,13 +431,17 @@ async def txt_handler(bot: Client, m: Message):
                     f"**Batch**: {b_name}\n\n"
                     f"**Uploaded By**: {CR}"
                 )
-                if cached["file_type"] == "video":
-                    await bot.send_video(m.chat.id, cached["file_id"], caption=cc)
-                else:
-                    await bot.send_document(m.chat.id, cached["file_id"], caption=cc1)
-                await asyncio.sleep(0.4)
-
-
+                while True:
+                    try:
+                        if cached["file_type"] == "video":
+                            await bot.send_video(m.chat.id, cached["file_id"], caption=cc)
+                        else:
+                            await bot.send_document(m.chat.id, cached["file_id"], caption=cc1)
+                        break
+                    except Floodwait as e:
+                        print(f"Floodwait: sleeping {e.value}s")
+                        await asyncio.sleep(e.value)
+                await asyncio.sleep(0.5)
                 count +=1
                 continue
                 
@@ -619,13 +623,12 @@ async def txt_handler(bot: Client, m: Message):
 
             if "playlist.m3u8" in url:
                 live = await helper.is_live_stream(url)
-
-            if live:
-                await m.reply_text(
-                    f"**Index**: {str(count).zfill(3)}\n\n\**Title**: {name1}\n\n**Batch**: {b_name}\n\n**Link**: {url}\n\n**Error**: Live Stream Detetcted - SKIPPED"
-                )
-                count += 1
-                continue
+                if live:
+                    await m.reply_text(
+                        f"**Index**: {str(count).zfill(3)}\n\n\**Title**: {name1}\n\n**Batch**: {b_name}\n\n**Link**: {url}\n\n**Error**: Live Stream Detetcted - SKIPPED"
+                    )
+                    count += 1
+                    continue
                     
            
             if "jw-prod" in url:
