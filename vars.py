@@ -10,3 +10,4 @@ BOT_TOKEN = os.environ.get("BOT_TOKEN", "8239749246:AAHpajo4unqhY_hZth1NgiZf8dPL
 MONGO_URL = os.environ.get("MONGO_URL", "mongodb+srv://lucifer:QGPQCl6ZFf6wHiZ7@cluster0.zmcca.mongodb.net/?retryWrites=true&w=majority")
 PREMIUM_LOGS = os.environ.get("PREMIUM_LOGS", "-1002844381920")
 OWNER_ID = os.environ.get("OWNER_ID", 7764674199)
+MONGOURL = os.environ.get("MONGOURL", "mongodb+srv://lucifermediadb:h91oybQRekaFQb9L@cluster0.nxjyzj5.mongodb.net/?appName=Cluster0")
