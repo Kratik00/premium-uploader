@@ -135,6 +135,19 @@ async def pdf_download(url, file_name, chunk_size=1024 * 10):
     return file_name   
    
 
+async def is_live_stream(url):
+    try:
+        proc = await asyncio.create_subprocess_shell(
+            f'yt-dlp --print is_live "{url}"',
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.DEVNULL
+        )
+
+        stdout, _ = await proc.communicate()
+        return stdout.decode().strip() == "True"
+
+    except:
+        return False
 def parse_vid_info(info):
     info = info.strip()
     info = info.split("\n")
