@@ -431,17 +431,17 @@ async def txt_handler(bot: Client, m: Message):
                     f"**Batch**: {b_name}\n\n"
                     f"**Uploaded By**: {CR}"
                 )
-                while True:
-                    try:
-                        if cached["file_type"] == "video":
-                            await bot.send_video(m.chat.id, cached["file_id"], caption=cc)
-                        else:
-                            await bot.send_document(m.chat.id, cached["file_id"], caption=cc1)
-                        break
-                    except Floodwait as e:
-                        print(f"Floodwait: sleeping {e.value}s")
-                        await asyncio.sleep(e.value)
-                await asyncio.sleep(0.5)
+                
+                try:
+                    if cached["file_type"] == "video":
+                        await bot.send_video(m.chat.id, cached["file_id"], caption=cc)
+                    else:
+                        await bot.send_document(m.chat.id, cached["file_id"], caption=cc1)
+                    break
+                except Floodwait as e:
+                    print(f"Floodwait: sleeping {e.value}s")
+                    await asyncio.sleep(e.value)
+                await asyncio.sleep(4)
                 count +=1
                 continue
                 
