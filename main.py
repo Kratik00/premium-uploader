@@ -439,7 +439,7 @@ async def txt_handler(bot: Client, m: Message):
                         else:
                             await bot.send_document(m.chat.id, cached["file_id"], caption=cc1)
                         break
-                     except Floodwait as e:
+                    except Floodwait as e:
                         print(f"Floodwait: sleeping {e.value}s")
                         await asyncio.sleep(e.value)
                 await asyncio.sleep(4)
