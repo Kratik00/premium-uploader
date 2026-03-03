@@ -432,15 +432,16 @@ async def txt_handler(bot: Client, m: Message):
                     f"**Uploaded By**: {CR}"
                 )
                 
-                try:
-                    if cached["file_type"] == "video":
-                        await bot.send_video(m.chat.id, cached["file_id"], caption=cc)
-                    else:
-                        await bot.send_document(m.chat.id, cached["file_id"], caption=cc1)
-                    break
-                except Floodwait as e:
-                    print(f"Floodwait: sleeping {e.value}s")
-                    await asyncio.sleep(e.value)
+                while True:
+                    try:
+                        if cached["file_type"] == "video":
+                            await bot.send_video(m.chat.id, cached["file_id"], caption=cc)
+                        else:
+                            await bot.send_document(m.chat.id, cached["file_id"], caption=cc1)
+                        break
+                     except Floodwait as e:
+                        print(f"Floodwait: sleeping {e.value}s")
+                        await asyncio.sleep(e.value)
                 await asyncio.sleep(4)
                 count +=1
                 continue
@@ -925,7 +926,8 @@ async def txt_handler(bot: Client, m: Message):
             
             except Exception as e:
                 await m.reply_text(
-                    f"**Index**: {str(count).zfill(3)}\n\n**Title**: {name1}\n\n**Batch**: {b_name}\n\n**Link**: {url}\n\n**Error**: {str(e)}"
+                    f"**Index**: {str(count).zfill(3)}\n\n**Title**: {name1}\n\n**Batch**: {b_name}\n\n**Link**: {url}\n\n**Error**: {str(e)}",
+                    disable_web_page_preview=True
                 )
                 continue
 
