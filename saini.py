@@ -58,6 +58,88 @@ def get_mps_and_keys2(api_url):
         print(f"JSON decode error: {e}")
         return None, None
 
+def get_m3u8(session, url):
+
+    try:
+
+        if "vimeo" not in url:
+            return url
+
+        headers = {
+            "Referer":"https://www.cdsjourney.com/",
+            "User-Agent":"Mozilla/5.0"
+        }
+
+        video_id = None
+
+        # normal + review + player urls
+        patterns = [
+            r'vimeo\.com/(?:video/)?(\d+)',
+            r'vimeo\.com/reviews/(\d+)',
+            r'player\.vimeo\.com/video/(\d+)'
+        ]
+
+        for p in patterns:
+            m = re.search(p,url)
+            if m:
+                video_id = m.group(1)
+                break
+
+        if not video_id:
+            return url
+
+        print("[+] VIDEO:",video_id)
+
+        player_url = (
+            f"https://player.vimeo.com/video/{video_id}"
+        )
+
+        r = session.get(
+            player_url,
+            headers=headers,
+            timeout=20
+        )
+
+        html = r.text
+
+        match = re.search(
+            r'window\.playerConfig\s*=\s*({.*?});',
+            html,
+            re.S
+        )
+
+        if not match:
+            print("playerConfig missing")
+            return url
+
+        data = json.loads(match.group(1))
+
+        cdns = (
+            data
+            .get("request",{})
+            .get("files",{})
+            .get("hls",{})
+            .get("cdns",{})
+        )
+
+        for _,info in cdns.items():
+
+            m3u8 = info.get("url")
+
+            if m3u8:
+
+                print("[+] M3U8:",m3u8)
+
+                return m3u8
+
+        return url
+
+    except Exception as e:
+
+        print("M3U8 ERROR:",e)
+
+        return url
+
 # Function to decrypt file URLs
 def decrypt_file_txt(input_file):
     output_file = "decrypted_" + input_file  # Output file ka naam
