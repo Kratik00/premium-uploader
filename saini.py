@@ -63,33 +63,53 @@ def get_m3u8(session, url):
 
     try:
 
-        if "vimeo" not in url:
+        if "vimeo.com" not in url:
             return url
 
         headers = {
-            "Referer":"https://www.cdsjourney.com/",
-            "User-Agent":"Mozilla/5.0"
+            "Referer": "https://www.cdsjourney.com",
+            "User-Agent": "Mozilla/5.0"
         }
+
+        # ================= GET VIDEO ID =================
 
         video_id = None
 
-        # normal + review + player urls
-        patterns = [
-            r'vimeo\.com/(?:video/)?(\d+)',
-            r'vimeo\.com/reviews/(\d+)',
-            r'player\.vimeo\.com/video/(\d+)'
-        ]
+        # review page fallback
+        if "vimeo.com/reviews/" in url:
 
-        for p in patterns:
-            m = re.search(p,url)
-            if m:
-                video_id = m.group(1)
-                break
+            r = session.get(
+                url,
+                headers=headers,
+                timeout=20
+            )
+
+            page = r.text
+
+            found = re.search(
+                r'player\.vimeo\.com/video/(\d+)',
+                page
+            )
+
+            if found:
+                video_id = found.group(1)
+
+        else:
+
+            found = re.search(
+                r'vimeo\.com/(?:video/)?(\d+)',
+                url
+            )
+
+            if found:
+                video_id = found.group(1)
 
         if not video_id:
             return url
 
-        print("[+] VIDEO:",video_id)
+        print(f"[+] VIDEO ID: {video_id}")
+
+        # ================= OPEN PLAYER HTML =================
 
         player_url = (
             f"https://player.vimeo.com/video/{video_id}"
@@ -101,45 +121,77 @@ def get_m3u8(session, url):
             timeout=20
         )
 
-        html = r.text
+        html_data = r.text
 
-        match = re.search(
-            r'window\.playerConfig\s*=\s*({.*?});',
-            html,
-            re.S
+        # ================= PARSE playerConfig =================
+
+        start = html_data.find(
+            "window.playerConfig ="
         )
 
-        if not match:
-            print("playerConfig missing")
+        if start == -1:
+
+            print("[-] playerConfig missing")
+
             return url
 
-        data = json.loads(match.group(1))
+        start = html_data.find("{", start)
 
-        cdns = (
-            data
-            .get("request",{})
-            .get("files",{})
-            .get("hls",{})
-            .get("cdns",{})
+        brace = 0
+        end = None
+
+        for i in range(start, len(html_data)):
+
+            if html_data[i] == "{":
+                brace += 1
+
+            elif html_data[i] == "}":
+
+                brace -= 1
+
+                if brace == 0:
+
+                    end = i + 1
+                    break
+
+        if not end:
+            return url
+
+        config_json = html_data[start:end]
+
+        data = json.loads(config_json)
+
+        # ================= GET HLS =================
+
+        hls = (
+            data["request"]
+            ["files"]
+            ["hls"]
+            ["cdns"]
         )
 
-        for _,info in cdns.items():
+        for cdn, info in hls.items():
 
-            m3u8 = info.get("url")
+            link = info.get("url")
 
-            if m3u8:
+            if link:
 
-                print("[+] M3U8:",m3u8)
+                print(
+                    f"[+] M3U8 FOUND ({cdn})"
+                )
 
-                return m3u8
+                return link
 
         return url
 
     except Exception as e:
 
-        print("M3U8 ERROR:",e)
+        print(
+            f"M3U8 ERROR: {e}"
+        )
 
         return url
+
 
 # Function to decrypt file URLs
 def decrypt_file_txt(input_file):
