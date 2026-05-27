@@ -476,28 +476,53 @@ async def download_video(url,cmd, name):
 
 #     return sent
 
-async def send_doc(bot: Client, m: Message, file_path, caption, channel_id=None, topic_id=None):
-    thread_kwargs = {}
+async def send_doc(
+    bot,
+    m,
+    file_path,
+    caption,
+    channel_id=None,
+    topic_id=None
+):
+
+    kwargs = dict(
+        chat_id=channel_id,
+        document=file_path,
+        caption=caption
+    )
+
     if topic_id:
-        thread_kwargs['message_thread_id'] = topic_id
+        kwargs["message_thread_id"]=topic_id
+
     try:
+
         if channel_id:
-            sent = await bot.send_document(
-                chat_id=channel_id,
-                document=file_path,
-                caption=caption,
-                **thread_kwargs
-            )
+
+            try:
+                sent = await bot.send_document(
+                    **kwargs
+                )
+
+            except TypeError:
+                kwargs.pop(
+                    "message_thread_id",
+                    None
+                )
+
+                sent = await bot.send_document(
+                    **kwargs
+                )
+
         else:
-            sent=await m.reply_document(
+            sent = await m.reply_document(
                 file_path,
                 caption=caption
             )
-    except Exception as e:
-        print(f"Error sending document: {e}")
+
     finally:
         if os.path.exists(file_path):
             os.remove(file_path)
+
     return sent
 
 def decrypt_file(file_path, key):  
@@ -565,32 +590,50 @@ async def download_and_decrypt_video(url, cmd, name, key):
 #             os.remove(thumbnail)
 
 #     return sent
-async def send_vid(bot: Client, m: Message, cc, filename, name, channel_id=None, topic_id=None):
+async def send_vid(
+    bot: Client,
+    m: Message,
+    cc,
+    filename,
+    name,
+    channel_id=None,
+    topic_id=None
+):
     subprocess.run(
         f'ffmpeg -i "{filename}" -ss 00:00:10 -vframes 1 "{filename}.jpg"',
         shell=True
     )
+
     thumbnail = None
     if os.path.exists(f"{filename}.jpg"):
         thumbnail = f"{filename}.jpg"
+
     try:
         dur = int(duration(filename))
     except:
         dur = None
-    thread_kwargs = {}
+
+    kwargs = dict(
+        chat_id=channel_id,
+        video=filename,
+        caption=cc,
+        supports_streaming=True,
+        duration=dur,
+        thumb=thumbnail
+    )
+
     if topic_id:
-        thread_kwargs['message_thread_id'] = topic_id
+        kwargs["message_thread_id"] = topic_id
+
     try:
         if channel_id:
-            sent = await bot.send_video(
-                chat_id=channel_id,
-                video=filename,
-                caption=cc,
-                supports_streaming=True,
-                duration=dur,
-                thumb=thumbnail,
-                **thread_kwargs
-            )
+            try:
+                sent = await bot.send_video(**kwargs)
+
+            except TypeError:
+                kwargs.pop("message_thread_id", None)
+                sent = await bot.send_video(**kwargs)
+
         else:
             sent = await m.reply_video(
                 filename,
@@ -599,27 +642,42 @@ async def send_vid(bot: Client, m: Message, cc, filename, name, channel_id=None,
                 duration=dur,
                 thumb=thumbnail
             )
-    except Exception as e:
-        print(f"Error sending video: {e}")
+
+    except:
+
         try:
-            if channel_id:
+            doc_kwargs = {
+                "chat_id":channel_id,
+                "document":filename,
+                "caption":cc
+            }
+
+            if topic_id:
+                doc_kwargs["message_thread_id"]=topic_id
+
+            try:
                 sent = await bot.send_document(
-                    chat_id=channel_id,
-                    document=filename,
-                    caption=cc,
-                    **thread_kwargs
+                    **doc_kwargs
                 )
-            else:
-                sent = await m.reply_document(
-                    filename,
-                    caption=cc
+
+            except TypeError:
+                doc_kwargs.pop(
+                    "message_thread_id",
+                    None
                 )
-        except Exception as e:
-            print(f"Error sending document fallback: {e}")
-            sent = None
+                sent = await bot.send_document(
+                    **doc_kwargs
+                )
+
+        except:
+            sent=None
+
     finally:
+
         if os.path.exists(filename):
             os.remove(filename)
+
         if thumbnail and os.path.exists(thumbnail):
             os.remove(thumbnail)
+
     return sent
