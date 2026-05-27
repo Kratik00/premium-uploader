@@ -371,6 +371,7 @@ async def txt_handler(bot: Client, m: Message):
         b_name = file_name.replace('_', ' ')
     else:
         b_name = raw_text0
+    thumb = None
         
     quality = f"{raw_text2}p"
     quality_map = {
