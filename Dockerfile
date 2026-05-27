@@ -32,7 +32,7 @@ RUN apk add --no-cache \
 
 # Install Python dependencies (yt-dlp unpinned so latest is used)
 RUN pip3 install --no-cache-dir --upgrade pip \
-    && pip3 install --no-cache-dir -r sainibots.txt \
+    && pip3 install --no-cache-dir -r requirements.txt \
     && pip3 install --no-cache-dir -U yt-dlp
 
 # Set the command to run the application
