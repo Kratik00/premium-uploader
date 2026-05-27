@@ -497,12 +497,12 @@ async def txt_handler(bot: Client, m: Message):
                         f"**Batch**: {b_name}\n\n"
                         f"**Uploaded By**: {CR}"
                     )
-                while True:                    
+                while True:
                     try:
-                        if cached["file_type"] == "video":
-                            await send_to_channel(bot.send_video, topic_id=current_topic_id, chat_id=channel_id, video=cached["file_id"], caption=cc)
-                        else:
-                            await send_to_channel(bot.send_document, topic_id=current_topic_id, chat_id=channel_id, document=cached["file_id"], caption=cc1)
+                        if cached["file_type"] == "video": 
+                            await helper.send_vid(bot, m, cc, cached["file_id"], thumb, name, channel_id, topic_id=current_topic_id)
+                        else: 
+                            await helper.send_doc(bot, m, cached["file_id"], cc1, channel_id=channel_id, topic_id=current_topic_id)
                         break
                     except FloodWait as e:
                         print(f"Floodwait: sleeping {e.value}s")
