@@ -357,7 +357,7 @@ async def txt_handler(bot: Client, m: Message):
     raw_text0 = data[1].strip()
     raw_text2 = data[2].strip()
     raw_text3 = data[3].strip()
-    raw_text4 = data[4].strip()
+    raw_text5 = data[4].strip()
     
     count = int(raw_text)
     arg = int(raw_text)
@@ -422,16 +422,17 @@ async def txt_handler(bot: Client, m: Message):
             name1 = links[i][0].replace("(", "[").replace(")", "]").replace("_", "").replace("\t", "").replace(":", "").replace("/", "").replace("+", "").replace("#", "").replace("|", "").replace("@", "").replace("*", "").replace(".", "").replace("https", "").replace("http", "").strip()
             name = f'{name1[:60]}'
             current_topic_id = None
-            if raw_text4.lower() == "yes":
+            t_name = "Untitled"
+            if raw_text5.lower() == "yes":
                 try:
                     chat_info = await bot.get_chat(channel_id)
+                    print("Forum:", chat_info.is_forum)
                     if getattr(chat_info, "is_forum", False):
                         raw_title = links[i][0]
                         t_match = re.search(r"[\(\[\{]([^\)\]\}]+)[\)\]\}]", raw_title)
                         if t_match:
                             t_name = t_match.group(1).strip()
-                        else:
-                            t_name = "Untitled"
+                        print("Extracted topic name:", t_name)
                         cache_key = f"{channel_id}_{t_name}"
                         if cache_key in topic_cache:
                             current_topic_id = topic_cache[cache_key]
@@ -443,9 +444,11 @@ async def txt_handler(bot: Client, m: Message):
                                     "name": t_name
                                 }
                             ).json()
+                            print("API response for topic creation:", api_resp)
                             if api_resp.get("ok"):
                                 current_topic_id = api_resp["result"]["message_thread_id"]
                                 topic_cache[cache_key] = current_topic_id
+                                print(f"Created topic '{t_name}' with ID {current_topic_id}")
                 except Exception as e:
                     print(f"Error creating topic: {e}")
                     current_topic_id = None
