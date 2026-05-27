@@ -351,7 +351,7 @@ async def txt_handler(bot: Client, m: Message):
     data = input_all.text.strip().split("\n")
     await input_all.delete(True)
     
-    if len(data) < 5:
+    if len(data) < 6:
         await editable.delete()
         return await m.reply_text("❌ __Invalid format.__")
         
@@ -361,6 +361,8 @@ async def txt_handler(bot: Client, m: Message):
     raw_text3 = data[3].strip()
     raw_text5 = data[4].strip()
     raw_text6 = data[5].strip()
+
+    channel_id = int(raw_text6)
     
     count = int(raw_text)
     arg = int(raw_text)
@@ -455,6 +457,10 @@ async def txt_handler(bot: Client, m: Message):
                         except Exception as te:
                             current_topic_id = None
                             await m.reply_text(f"⚠️ Could not create topic `{t_name}`: {str(te)}\nUploading to General as fallback.")
+            except Exception as e:
+                current_topic_id = None
+                t_name = "General"
+                v_name = name1
             
                 
             
