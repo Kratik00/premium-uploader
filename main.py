@@ -19,7 +19,7 @@ from Crypto.Util.Padding import unpad
 from base64 import b64encode, b64decode
 from logs import logging
 from bs4 import BeautifulSoup
-import saini as helper
+import lucifer as helper
 from utils import progress_bar
 from vars import API_ID, API_HASH, BOT_TOKEN, OWNER_ID, MONGO_URL, MONGOURL
 from aiohttp import ClientSession
@@ -330,6 +330,7 @@ async def txt_handler(bot: Client, m: Message):
         "2️⃣ Batch name (0 to skip)\n"
         "3️⃣ Resolution (360/480/720)\n"
         "4️⃣ Credit (0 to default)\n"
+        "4️⃣ Topic Upload? (yes or no)\n"
     )
     try:
         input_all: Message = await bot.listen(
@@ -348,7 +349,7 @@ async def txt_handler(bot: Client, m: Message):
     data = input_all.text.strip().split("\n")
     await input_all.delete(True)
     
-    if len(data) < 4:
+    if len(data) < 5:
         await editable.delete()
         return await m.reply_text("❌ __Invalid format.__")
         
@@ -356,6 +357,7 @@ async def txt_handler(bot: Client, m: Message):
     raw_text0 = data[1].strip()
     raw_text2 = data[2].strip()
     raw_text3 = data[3].strip()
+    raw_text4 = data[4].strip()
     
     count = int(raw_text)
     arg = int(raw_text)
@@ -397,9 +399,16 @@ async def txt_handler(bot: Client, m: Message):
         except:
             pass
 
+    channel_id = m.chat.id
+
     failed_count = 0
     count =int(raw_text)    
     arg = int(raw_text)
+    topic_cache = {}
+    async def send_to_channel(method, topic_id=None, **kwargs):
+        if topic_id:
+            kwargs["message_thread_id"] = topic_id
+        return await method(**kwargs)
     try:
         for i in range(arg-1, len(links)):
 
@@ -412,36 +421,93 @@ async def txt_handler(bot: Client, m: Message):
 
             name1 = links[i][0].replace("(", "[").replace(")", "]").replace("_", "").replace("\t", "").replace(":", "").replace("/", "").replace("+", "").replace("#", "").replace("|", "").replace("@", "").replace("*", "").replace(".", "").replace("https", "").replace("http", "").strip()
             name = f'{name1[:60]}'
+            current_topic_id = None
+            if channel_id != m.chat.id:
+                if channel_id != m.chat.id:
+                    try:
+                        chat_info = await bot.get_chat(channel_id)
+                        if getattr(chat_info, "is_forum", False):
+                            raw_title = links[i][0]
+                            t_match = re.search(r"[\(\[\{]([^\)\]\}]+)[\)\]\}]", raw_title)
+                            if t_match:
+                                t_name = t_match.group(1).strip()
+                            else:
+                                t_name = "Untitled"
+                                cache_key = f"{channel_id}_{t_name}"
+                                if cache_key in topic_cache:
+                                    current_topic_id = topic_cache[cache_key]
+                                else:
+                                    api_resp = requests.post(
+                                        f"https://api.telegram.org/bot{BOT_TOKEN}/createForumTopic",
+                                        json={
+                                            "chat_id": channel_id,
+                                            "name": t_name
+                                        }
+                                    ).json()
+                                    if api_resp.get("ok"):
+                                        current_topic_id = api_resp["result"]["message_thread_id"]
+                                        topic_cache[cache_key] = current_topic_id
+                    except Exception as e:
+                        print(f"Error creating topic: {e}")
+                        current_topic_id = None
+                
             
             media_url = url.split("?")[0]
 
             cached = await media_db.find_one({"media_url": media_url})
             if cached:
-                print("using cache........")
-
-                cc = (
-                    f"**Index**: {str(count).zfill(3)}\n\n"
-                    f"**Title**: {name1}.mp4\n\n"
-                    f"**Batch**: {b_name}\n\n"
-                    f"**Uploaded By**: {CR}"
-                )
-                cc1 = (
-                    f"**Index**: {str(count).zfill(3)}\n\n"
-                    f"**Title**: {name1}.pdf\n\n"
-                    f"**Batch**: {b_name}\n\n"
-                    f"**Uploaded By**: {CR}"
-                )
-                
-                while True:
+                if current_topic_id:
+                    cc = (
+                        f"**Index**: {str(count).zfill(3)}\n\n"
+                        f"**Title**: {name1}\n\n"
+                        f"**Batch**: {b_name}\n\n"
+                        f"**Topic**: {t_name}\n\n"
+                        f"**Uploaded By**: {CR}"
+                    )
+                    cc1 = (
+                        f"**Index**: {str(count).zfill(3)}\n\n"
+                        f"**Title**: {name1}\n\n"
+                        f"**Batch**: {b_name}\n\n"
+                        f"**Topic**: {t_name}\n\n"
+                        f"**Uploaded By**: {CR}"
+                    )
+                else:
+                    cc = (
+                        f"**Index**: {str(count).zfill(3)}\n\n"
+                        f"**Title**: {name1}\n\n"
+                        f"**Batch**: {b_name}\n\n"
+                        f"**Uploaded By**: {CR}"
+                    )
+                    cc1 = (
+                        f"**Index**: {str(count).zfill(3)}\n\n"
+                        f"**Title**: {name1}\n\n"
+                        f"**Batch**: {b_name}\n\n"
+                        f"**Uploaded By**: {CR}"
+                    )
+                while True:                    
                     try:
                         if cached["file_type"] == "video":
-                            await bot.send_video(m.chat.id, cached["file_id"], caption=cc)
+                            await send_to_channel(bot.send_video, topic_id=current_topic_id, chat_id=channel_id, video=cached["file_id"], caption=cc)
                         else:
-                            await bot.send_document(m.chat.id, cached["file_id"], caption=cc1)
+                            await send_to_channel(bot.send_document, topic_id=current_topic_id, chat_id=channel_id, document=cached["file_id"], caption=cc1)
                         break
                     except Floodwait as e:
                         print(f"Floodwait: sleeping {e.value}s")
                         await asyncio.sleep(e.value)
+
+                # cc = (
+                #     f"**Index**: {str(count).zfill(3)}\n\n"
+                #     f"**Title**: {name1}.mp4\n\n"
+                #     f"**Batch**: {b_name}\n\n"
+                #     f"**Topic**: {t_name if current_topic_id else 'N/A'}\n\n"
+                #     f"**Uploaded By**: {CR}"
+                # )
+                # cc1 = (
+                #     f"**Index**: {str(count).zfill(3)}\n\n"
+                #     f"**Title**: {name1}.pdf\n\n"
+                #     f"**Batch**: {b_name}\n\n"
+                #     f"**Uploaded By**: {CR}"
+                # )
                 await asyncio.sleep(4)
                 count +=1
                 continue
@@ -651,20 +717,36 @@ async def txt_handler(bot: Client, m: Message):
 
             try:
                 # cc = f"**╭━━━━━ INFO ━━━━━╮**\n💫 **Video ID:** `{str(count).zfill(3)}`\n**╰━━━━━━━━━━━━━━╯**\n\n📁 **Title:** `{name1} ({res}) lucifer.mkv`\n📚 **Course:** `{b_name}`\n\n⚡ **Downloaded By:** {CR}"
-                cc = (
-                    f"**Index**: {str(count).zfill(3)}\n\n"
-                    f"**Title**: {name1}.mp4\n\n"
-                    f"**Batch**: {b_name}\n\n"
-                    f"**Uploaded By**: {CR}"
-                )
+                if current_topic_id:
+                    cc = (
+                        f"**Index**: {str(count).zfill(3)}\n\n"
+                        f"**Title**: {name1}.mp4\n\n"
+                        f"**Batch**: {b_name}\n\n"
+                        f"**Topic**: {t_name}\n\n"
+                        f"**Uploaded By**: {CR}"
+                    )
+                    cc1 = (
+                        f"**Index**: {str(count).zfill(3)}\n\n"
+                        f"**Title**: {name1}.pdf\n\n"
+                        f"**Batch**: {b_name}\n\n"
+                        f"**Topic**: {t_name}\n\n"
+                        f"**Uploaded By**: {CR}"
+                    )
+                else:
+                    cc = (
+                        f"**Index**: {str(count).zfill(3)}\n\n"
+                        f"**Title**: {name1}.mp4\n\n"
+                        f"**Batch**: {b_name}\n\n"
+                        f"**Uploaded By**: {CR}"
+                    )
                 # cc1 = f"<blockquote>╭━━━━━ INFO ━━━━━╮\n💫 <b>File ID:</b> <b>{str(count).zfill(3)}</b>\n╰━━━━━━━━━━━━━━╯\n\n📁 <b>Title:</b> <b>{name1} lucifer.pdf</b>\n📚 <b>Course:</b> <b>{b_name}</b>\n\n⚡ **Downloaded By:** {CR}</blockquote>"
                 #cczip = f"**——— ✦ {str(count).zfill(3)} ✦ ———**\n\n📁 **Title:** `{name1}.zip`\n📚 **Course:** `{b_name}`\n\n⚡ **Extracted By:** {CR}"
-                cc1 = (
-                    f"**Index**: {str(count).zfill(3)}\n\n"
-                    f"**Title**: {name1}.pdf\n\n"
-                    f"**Batch**: {b_name}\n\n"
-                    f"**Uploaded By**: {CR}"
-                )
+                    cc1 = (
+                        f"**Index**: {str(count).zfill(3)}\n\n"
+                        f"**Title**: {name1}.pdf\n\n"
+                        f"**Batch**: {b_name}\n\n"
+                        f"**Uploaded By**: {CR}"
+                    )
                 # ccimg = f"**╭━━━━ IMAGE ━━━━╮**\n💫 **Image ID:** `{str(count).zfill(3)}`\n**╰━━━━━━━━━━━━━━╯**\n\n📁 **Title:** `{name1} lucifer.JPG`\n📚 **Course:** `{b_name}`\n\n⚡ **Downloaded By:** {CR}"
                 # ccm = f"**——— ✦ {str(count).zfill(3)} ✦ ———**\n\n🎵 **Title:** `{name1}.mp3`\n📚 **Course:** `{b_name}`\n\n⚡ **Extracted By:** {CR}"
                 # cchtml = f"**——— ✦ {str(count).zfill(3)} ✦ ———**\n\n🌐 **Title:** `{name1}.html`\n📚 **Course:** `{b_name}`\n\n⚡ **Extracted By:** {CR}"
@@ -687,7 +769,7 @@ async def txt_handler(bot: Client, m: Message):
                 if "drive" in url:
                     try:
                         ka = await helper.download(url, name)
-                        copy = await bot.send_document(chat_id=m.chat.id, document=ka, caption=cc1)
+                        copy = await send_to_channel(bot.send_document, topic_id=current_topic_id, chat_id=channel_id, document=ka, caption=cc1)
                         count += 1
                         os.remove(ka)
                     except FloodWait as e:
@@ -713,7 +795,7 @@ async def txt_handler(bot: Client, m: Message):
                                     with open(f'{name}.pdf', 'wb') as file:
                                         file.write(response.content)
                                     await asyncio.sleep(retry_delay)  # Optional, to prevent spamming
-                                    copy = await bot.send_document(chat_id=m.chat.id, document=f'{name}.pdf', caption=cc1)
+                                    copy = await send_to_channel(bot.send_document, topic_id=current_topic_id, chat_id=channel_id, document=f'{name}.pdf', caption=cc1)
                                     count += 1
                                     os.remove(f'{name}.pdf')
                                     success = True
@@ -741,7 +823,7 @@ async def txt_handler(bot: Client, m: Message):
                             cmd = f'yt-dlp -o "{name}.pdf" "{url}"'
                             download_cmd = f"{cmd} -R 25 --fragment-retries 25"
                             os.system(download_cmd)
-                            sent = await helper.send_doc(bot, m, f"{name}.pdf", cc1)
+                            sent = await helper.send_doc(bot, m, f'{name}.pdf', cc1, channel_id=channel_id, topic_id=current_topic_id)
                             file_id = None
                             file_type = None
                             if sent.video:
@@ -777,7 +859,7 @@ async def txt_handler(bot: Client, m: Message):
                     try:
                         await helper.pdf_download(f"{api_url}utkash-ws?url={url}&authorization={api_token}", f"{name}.html")
                         time.sleep(1)
-                        await bot.send_document(chat_id=m.chat.id, document=f"{name}.html", caption=cchtml)
+                        await send_to_channel(bot.send_document, topic_id=current_topic_id, chat_id=channel_id, document=f'{name}.html', caption=cchtml)
                         os.remove(f'{name}.html')
                         count += 1
                     except FloodWait as e:
@@ -807,7 +889,7 @@ async def txt_handler(bot: Client, m: Message):
                             os.remove(filename)
                             filename = jpg_file
 
-                        copy = await bot.send_photo(chat_id=m.chat.id, photo=filename, caption=ccimg)
+                        copy = await send_to_channel(bot.send_document, topic_id=current_topic_id, chat_id=channel_id, document=filename, caption=ccimg)
                         count += 1
                         os.remove(filename)
 
@@ -825,7 +907,7 @@ async def txt_handler(bot: Client, m: Message):
                         cmd = f'yt-dlp -o "{name}.{ext}" "{url}"'
                         download_cmd = f"{cmd} -R 25 --fragment-retries 25"
                         os.system(download_cmd)
-                        copy = await bot.send_document(chat_id=m.chat.id, document=f'{name}.{ext}', caption=ccm)
+                        copy = await send_to_channel(bot.send_document, topic_id=current_topic_id, chat_id=channel_id, document=f'{name}.{ext}', caption=ccm)
                         count += 1
                         os.remove(f'{name}.{ext}')
                     except FloodWait as e:
@@ -837,7 +919,7 @@ async def txt_handler(bot: Client, m: Message):
                 elif 'encrypted.m' in url:
                     res_file = await helper.download_and_decrypt_video(url, cmd, name, appxkey)
                     if res_file:
-                        sent = await helper.send_vid(bot, m, cc, res_file, name)
+                        sent = await helper.send_vid(bot, m, cc, res_file, name, channel_id=channel_id, topic_id=current_topic_id)
                         file_id = None
                         file_type = None
                         if sent.video:
@@ -869,7 +951,7 @@ async def txt_handler(bot: Client, m: Message):
                 elif 'drmcdni' in url or 'drm/wv' in url or 'drm/common' in url:
                     res_file = await helper.decrypt_and_merge_video(mpd, keys_string, path, name, raw_text2)
                     if res_file:
-                        sent = await helper.send_vid(bot, m, cc, res_file, name)
+                        sent = await helper.send_vid(bot, m, cc, res_file, name, channel_id=channel_id, topic_id=current_topic_id)
                         file_id = None
                         file_type = None
                         if sent.video:
@@ -901,7 +983,7 @@ async def txt_handler(bot: Client, m: Message):
                 else:
                     res_file = await helper.download_video(url, cmd, name)
                     if res_file:
-                        sent = await helper.send_vid(bot, m, cc, res_file, name)
+                        sent = await helper.send_vid(bot, m, cc, res_file, name, channel_id=channel_id, topic_id=current_topic_id)
                         file_id = None
                         file_type = None
                         if sent.video:

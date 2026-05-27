@@ -461,18 +461,58 @@ async def download_video(url,cmd, name):
     except FileNotFoundError as exc:
         return os.path.isfile.splitext[0] + "." + "mp4"
 
-async def send_doc(bot: Client, m: Message, file_path, caption):
+# async def send_doc(bot: Client, m: Message, file_path, caption):
 
+#     try:
+#         sent = await m.reply_document(
+#             file_path,
+#             caption=caption
+#         )
+
+#     finally:
+#         if os.path.exists(file_path):
+#             os.remove(file_path)
+
+#     return sent
+
+async def send_doc(bot: Client, m: Message, file_path, caption, channel_id=None, topic_id=None):
+    thread_kwargs = {}
+    if topic_id:
+        thread_kwargs['message_thread_id'] = topic_id
     try:
-        sent = await m.reply_document(
-            file_path,
-            caption=caption
-        )
-
+        if channel_id:
+            sent = await bot.send_document(
+                chat_id=channel_id,
+                document=file_path,
+                caption=caption,
+                **thread_kwargs
+            )
+        else:
+            sent=await m.reply_document(
+                file_path,
+                caption=caption
+            )
+    except Exception as e:
+        print(f"Error sending document: {e}")
+        try:
+            if channel_id:
+                sent = await bot.send_document(
+                    chat_id=channel_id,
+                    document=file_path,
+                    caption=caption,
+                    **thread_kwargs
+                )
+            else:
+                sent = await m.reply_document(
+                    file_path,
+                    caption=caption
+                )
+        except Exception as e:
+            print(f"Error sending document fallback: {e}")
+            sent = None
     finally:
         if os.path.exists(file_path):
             os.remove(file_path)
-
     return sent
 
 def decrypt_file(file_path, key):  
@@ -498,45 +538,103 @@ async def download_and_decrypt_video(url, cmd, name, key):
             print(f"Failed to decrypt {video_path}.")  
             return None  
 
-async def send_vid(bot: Client, m: Message, cc, filename, name):
+# async def send_vid(bot: Client, m: Message, cc, filename, name):
 
-    # 🔹 Generate thumbnail at 2 seconds (safer than 10s)
+#     # 🔹 Generate thumbnail at 2 seconds (safer than 10s)
+#     subprocess.run(
+#         f'ffmpeg -i "{filename}" -ss 00:00:10 -vframes 1 "{filename}.jpg"',
+#         shell=True
+#     )
+
+#     thumbnail = None
+#     if os.path.exists(f"{filename}.jpg"):
+#         thumbnail = f"{filename}.jpg"
+
+#     # 🔹 Get duration safely
+#     try:
+#         dur = int(duration(filename))
+#     except:
+#         dur = None
+
+#     try:
+#         sent = await m.reply_video(
+#             filename,
+#             caption=cc,
+#             supports_streaming=True,
+#             duration=dur,
+#             thumb=thumbnail
+#         )
+
+#     except Exception:
+#         # fallback if video fails
+#         sent = await m.reply_document(
+#             filename,
+#             caption=cc
+#         )
+
+#     finally:
+#         if os.path.exists(filename):
+#             os.remove(filename)
+
+#         if thumbnail and os.path.exists(thumbnail):
+#             os.remove(thumbnail)
+
+#     return sent
+async def send_vid(bot: Client, m: Message, cc, filename, name, channel_id=None, topic_id=None):
     subprocess.run(
         f'ffmpeg -i "{filename}" -ss 00:00:10 -vframes 1 "{filename}.jpg"',
         shell=True
     )
-
     thumbnail = None
     if os.path.exists(f"{filename}.jpg"):
         thumbnail = f"{filename}.jpg"
-
-    # 🔹 Get duration safely
     try:
         dur = int(duration(filename))
     except:
-        dur = None
-
+        dur = 0
+    thread_kwargs = {}
+    if topic_id:
+        thread_kwargs['message_thread_id'] = topic_id
     try:
-        sent = await m.reply_video(
-            filename,
-            caption=cc,
-            supports_streaming=True,
-            duration=dur,
-            thumb=thumbnail
-        )
-
-    except Exception:
-        # fallback if video fails
-        sent = await m.reply_document(
-            filename,
-            caption=cc
-        )
-
+        if channel_id:
+            sent = await bot.send_video(
+                chat_id=channel_id,
+                video=filename,
+                caption=cc,
+                supports_streaming=True,
+                duration=dur,
+                thumb=thumbnail,
+                **thread_kwargs
+            )
+        else:
+            sent = await m.reply_video(
+                filename,
+                caption=cc,
+                supports_streaming=True,
+                duration=dur,
+                thumb=thumbnail
+            )
+    except Exception as e:
+        print(f"Error sending video: {e}")
+        try:
+            if channel_id:
+                sent = await bot.send_document(
+                    chat_id=channel_id,
+                    document=filename,
+                    caption=cc,
+                    **thread_kwargs
+                )
+            else:
+                sent = await m.reply_document(
+                    filename,
+                    caption=cc
+                )
+        except Exception as e:
+            print(f"Error sending document fallback: {e}")
+            sent = None
     finally:
         if os.path.exists(filename):
             os.remove(filename)
-
         if thumbnail and os.path.exists(thumbnail):
             os.remove(thumbnail)
-
     return sent
