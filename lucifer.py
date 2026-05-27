@@ -21,6 +21,7 @@ from pathlib import Path
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import unpad
 from base64 import b64decode
+from requests.exceptions import RequestException
 
 
 
@@ -494,22 +495,6 @@ async def send_doc(bot: Client, m: Message, file_path, caption, channel_id=None,
             )
     except Exception as e:
         print(f"Error sending document: {e}")
-        try:
-            if channel_id:
-                sent = await bot.send_document(
-                    chat_id=channel_id,
-                    document=file_path,
-                    caption=caption,
-                    **thread_kwargs
-                )
-            else:
-                sent = await m.reply_document(
-                    file_path,
-                    caption=caption
-                )
-        except Exception as e:
-            print(f"Error sending document fallback: {e}")
-            sent = None
     finally:
         if os.path.exists(file_path):
             os.remove(file_path)
@@ -591,7 +576,7 @@ async def send_vid(bot: Client, m: Message, cc, filename, name, channel_id=None,
     try:
         dur = int(duration(filename))
     except:
-        dur = 0
+        dur = None
     thread_kwargs = {}
     if topic_id:
         thread_kwargs['message_thread_id'] = topic_id

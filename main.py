@@ -422,7 +422,7 @@ async def txt_handler(bot: Client, m: Message):
             name1 = links[i][0].replace("(", "[").replace(")", "]").replace("_", "").replace("\t", "").replace(":", "").replace("/", "").replace("+", "").replace("#", "").replace("|", "").replace("@", "").replace("*", "").replace(".", "").replace("https", "").replace("http", "").strip()
             name = f'{name1[:60]}'
             current_topic_id = None
-            if channel_id != m.chat.id:
+            if raw_text4.lower() == "yes":
                 if channel_id != m.chat.id:
                     try:
                         chat_info = await bot.get_chat(channel_id)
@@ -433,20 +433,20 @@ async def txt_handler(bot: Client, m: Message):
                                 t_name = t_match.group(1).strip()
                             else:
                                 t_name = "Untitled"
-                                cache_key = f"{channel_id}_{t_name}"
-                                if cache_key in topic_cache:
-                                    current_topic_id = topic_cache[cache_key]
-                                else:
-                                    api_resp = requests.post(
-                                        f"https://api.telegram.org/bot{BOT_TOKEN}/createForumTopic",
-                                        json={
-                                            "chat_id": channel_id,
-                                            "name": t_name
-                                        }
-                                    ).json()
-                                    if api_resp.get("ok"):
-                                        current_topic_id = api_resp["result"]["message_thread_id"]
-                                        topic_cache[cache_key] = current_topic_id
+                            cache_key = f"{channel_id}_{t_name}"
+                            if cache_key in topic_cache:
+                                current_topic_id = topic_cache[cache_key]
+                            else:
+                                api_resp = requests.post(
+                                    f"https://api.telegram.org/bot{BOT_TOKEN}/createForumTopic",
+                                    json={
+                                        "chat_id": channel_id,
+                                        "name": t_name
+                                    }
+                                ).json()
+                                if api_resp.get("ok"):
+                                    current_topic_id = api_resp["result"]["message_thread_id"]
+                                    topic_cache[cache_key] = current_topic_id
                     except Exception as e:
                         print(f"Error creating topic: {e}")
                         current_topic_id = None
@@ -826,10 +826,10 @@ async def txt_handler(bot: Client, m: Message):
                             sent = await helper.send_doc(bot, m, f'{name}.pdf', cc1, channel_id=channel_id, topic_id=current_topic_id)
                             file_id = None
                             file_type = None
-                            if sent.video:
+                            if sent and sent.video:
                                 file_id = sent.video.file_id
                                 file_type = "video"
-                            elif sent.document:
+                            elif sent and sent.document:
                                 file_id = sent.document.file_id
                                 file_type = "document"
                             if file_id:
@@ -922,10 +922,10 @@ async def txt_handler(bot: Client, m: Message):
                         sent = await helper.send_vid(bot, m, cc, res_file, name, channel_id=channel_id, topic_id=current_topic_id)
                         file_id = None
                         file_type = None
-                        if sent.video:
+                        if sent and sent.video:
                             file_id = sent.video.file_id
                             file_type = "video"
-                        elif sent.document:
+                        elif sent and sent.document:
                             file_id = sent.document.file_id
                             file_type = "document"
                         if file_id:
@@ -954,10 +954,10 @@ async def txt_handler(bot: Client, m: Message):
                         sent = await helper.send_vid(bot, m, cc, res_file, name, channel_id=channel_id, topic_id=current_topic_id)
                         file_id = None
                         file_type = None
-                        if sent.video:
+                        if sent and sent.video:
                             file_id = sent.video.file_id
                             file_type = "video"
-                        elif sent.document:
+                        elif sent and sent.document:
                             file_id = sent.document.file_id
                             file_type = "document"
                         if file_id:
@@ -986,10 +986,10 @@ async def txt_handler(bot: Client, m: Message):
                         sent = await helper.send_vid(bot, m, cc, res_file, name, channel_id=channel_id, topic_id=current_topic_id)
                         file_id = None
                         file_type = None
-                        if sent.video:
+                        if sent and sent.video:
                             file_id = sent.video.file_id
                             file_type = "video"
-                        elif sent.document:
+                        elif sent and sent.document:
                             file_id = sent.document.file_id
                             file_type = "document"
                         if file_id:
@@ -1011,18 +1011,30 @@ async def txt_handler(bot: Client, m: Message):
                                 print("Mongo Save Error:", db_error)
                         count += 1
                     continue
-            
             except Exception as e:
-                await m.reply_text(
-                    f"**Index**: {str(count).zfill(3)}\n\n**Title**: {name1}\n\n**Batch**: {b_name}\n\n**Link**: {url}\n\n**Error**: {str(e)}",
-                    disable_web_page_preview=True
-                )
-                continue
-
+                if current_topic_id:
+                    error_msg = (
+                        f"**Index**: {str(count).zfill(3)}\n\n"
+                        f"**Title**: {name1}\n\n"
+                        f"**Batch**: {b_name}\n\n"
+                        f"**Topic**: {t_name}\n\n"
+                        f"**Uploaded By**: {CR}\n\n"
+                        f"**Error:** {str(e)}"
+                    )
+                else:
+                    error_msg = (
+                        f"**Index**: {str(count).zfill(3)}\n\n"
+                        f"**Title**: {name1}\n\n"
+                        f"**Batch**: {b_name}\n\n"
+                        f"**Uploaded By**: {CR}\n\n"
+                        f"**Error:** {str(e)}"
+                    )
+                await m.reply_text(error_msg, disable_web_page_preview=True)
+                continue 
     except Exception as e:
-        await m.reply_text(str(e))   
-
+        await m.reply_text(f"{str(e)}")   
     cancel_flags.pop(m.chat.id, None)
-    await m.reply_text("DONE ✅")               
-                 
-bot.run()
+    await m.reply_text("Processing completed for all links.")  
+
+bot.run()  
+            
