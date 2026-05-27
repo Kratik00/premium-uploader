@@ -547,6 +547,8 @@ async def download_and_decrypt_video(url, cmd, name, key):
             print(f"Failed to decrypt {video_path}.")  
             return None  
 
+MAX_FILE_SIZE_BYTES = 2000 * 1024 * 1024
+
 async def split_video(filename):
     """Split a video into parts of ~1999 MB each using ffmpeg segment muxer."""
     base, ext = os.path.splitext(filename)
