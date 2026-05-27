@@ -453,11 +453,12 @@ async def txt_handler(bot: Client, m: Message):
                 else:
                     try:
                         api_resp = requests.post(
-                        f"https://api.telegram.org/bot{BOT_TOKEN}/createForumTopic",
+                            f"https://api.telegram.org/bot{BOT_TOKEN}/createForumTopic",
                             json={
-                                "chat_id": channel_id,
+                                "chat_id": int(channel_id) if isinstance(channel_id, str) else channel_id,
                                 "name": t_name
-                            }
+                            },
+                            timeout=10
                         ).json()
                         if not api_resp.get("ok"):
                             raise Exception(
@@ -472,6 +473,7 @@ async def txt_handler(bot: Client, m: Message):
                         
                     except Exception as e:
                         print(f"Error creating topic: {e}")
+                        current_topic_id = None
                 
             
             media_url = url.split("?")[0]
