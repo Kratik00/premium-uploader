@@ -402,28 +402,15 @@ async def txt_handler(bot: Client, m: Message):
         except:
             pass
 
-    if "no" in raw_text5.lower():
-        channel_id = m.chat.id
-    else:
-        channel_id = int(raw_text6)
-
     failed_count = 0
     count =int(raw_text)    
     arg = int(raw_text)
     topic_cache = {}
     async def send_to_channel(method, topic_id=None, **kwargs):
-        """Send message with proper error handling for message_thread_id"""
-        if topic_id and kwargs.get("chat_id"):
-            # Only add message_thread_id if we have a valid topic_id
+        """Send to channel, injecting message_thread_id when topic_id is set."""
+        if topic_id:
             kwargs["message_thread_id"] = topic_id
-        try:
-            return await method(**kwargs)
-        except TypeError as e:
-            if "message_thread_id" in str(e):
-                # Chat doesn't support topics, retry without it
-                kwargs.pop("message_thread_id", None)
-                return await method(**kwargs)
-            raise
+        return await method(**kwargs)
     try:
         for i in range(arg-1, len(links)):
 
@@ -436,44 +423,39 @@ async def txt_handler(bot: Client, m: Message):
 
             name1 = links[i][0].replace("(", "[").replace(")", "]").replace("_", "").replace("\t", "").replace(":", "").replace("/", "").replace("+", "").replace("#", "").replace("|", "").replace("@", "").replace("*", "").replace(".", "").replace("https", "").replace("http", "").strip()
             name = f'{name1[:60]}'
-            current_topic_id = None
-            t_name = None
-            if raw_text5.lower() == "yes":
-                raw_title = links[i][0]
-                t_match = re.search(r"[\(\[\{]([^\)\]\}]+)[\)\]\}]", raw_title)
-                if t_match:
-                    t_name = t_match.group(1).strip()
-                    print("Extracted topic name:", t_name)
-                else:
-                    t_name = "Untitled"
-                        
-                cache_key = f"{channel_id}_{t_name}"
-                if cache_key in topic_cache:
-                    current_topic_id = topic_cache[cache_key]
-                else:
-                    try:
-                        api_resp = requests.post(
-                            f"https://api.telegram.org/bot{BOT_TOKEN}/createForumTopic",
-                            json={
-                                "chat_id": int(channel_id) if isinstance(channel_id, str) else channel_id,
-                                "name": t_name
-                            },
-                            timeout=10
-                        ).json()
-                        if not api_resp.get("ok"):
-                            raise Exception(
-                                api_resp.get(
-                                    "description",
-                                    "topic create failed"
-                                )
-                            )
-                        current_topic_id = api_resp["result"]["message_thread_id"]
-                        topic_cache[cache_key] = current_topic_id
+            try:
+                # ── Determine topic_id for forum/topic channels ───────────────────
+                current_topic_id = None  # None = regular channel (no topic threading)
 
-                        
-                    except Exception as e:
-                        print(f"Error creating topic: {e}")
-                        current_topic_id = None
+                if raw_text5.lower() == "yes":
+                    raw_title = links[i][0]
+                    t_match = re.search(r"[\(\[\{]([^\)\]\}]+)[\)\]\}]", raw_title)
+                    if t_match:
+                        t_name = t_match.group(1).strip()
+                        v_name = re.sub(r"^[\(\[\{][^\)\]\}]+[\)\]\}]\s*", "", raw_title)
+                        v_name = re.sub(r"[\(\[\{][^\)\]\}]+[\)\]\}]", "", v_name)
+                        v_name = re.sub(r":.*", "", v_name).strip()
+                    else:
+                        t_name = "Untitled"
+                        v_name = re.sub(r":.*", "", raw_title).strip()
+
+                    # ── Reuse or create forum topic (cached per batch) ───────
+                    if t_name in topic_cache:
+                        current_topic_id = topic_cache[t_name]
+                    else:
+                        try:
+                            api_resp = requests.post(
+                                f"https://api.telegram.org/bot{BOT_TOKEN}/createForumTopic",
+                                json={"chat_id": channel_id, "name": t_name}
+                            ).json()
+                            if not api_resp.get("ok"):
+                                raise Exception(api_resp.get("description", "Unknown error"))
+                            current_topic_id = api_resp["result"]["message_thread_id"]
+                            topic_cache[t_name] = current_topic_id
+                        except Exception as te:
+                            current_topic_id = None
+                            await m.reply_text(f"⚠️ Could not create topic `{t_name}`: {str(te)}\nUploading to General as fallback.")
+            
                 
             
             media_url = url.split("?")[0]
@@ -483,14 +465,14 @@ async def txt_handler(bot: Client, m: Message):
                 if current_topic_id:
                     cc = (
                         f"**Index**: {str(count).zfill(3)}\n\n"
-                        f"**Title**: {name1}\n\n"
+                        f"**Title**: {v_name}\n\n"
                         f"**Batch**: {b_name}\n\n"
                         f"**Topic**: {t_name}\n\n"
                         f"**Uploaded By**: {CR}"
                     )
                     cc1 = (
                         f"**Index**: {str(count).zfill(3)}\n\n"
-                        f"**Title**: {name1}\n\n"
+                        f"**Title**: {v_name}\n\n"
                         f"**Batch**: {b_name}\n\n"
                         f"**Topic**: {t_name}\n\n"
                         f"**Uploaded By**: {CR}"
@@ -523,20 +505,6 @@ async def txt_handler(bot: Client, m: Message):
                             current_topic_id = None
                             continue
                         raise
-
-                # cc = (
-                #     f"**Index**: {str(count).zfill(3)}\n\n"
-                #     f"**Title**: {name1}.mp4\n\n"
-                #     f"**Batch**: {b_name}\n\n"
-                #     f"**Topic**: {t_name if current_topic_id else 'N/A'}\n\n"
-                #     f"**Uploaded By**: {CR}"
-                # )
-                # cc1 = (
-                #     f"**Index**: {str(count).zfill(3)}\n\n"
-                #     f"**Title**: {name1}.pdf\n\n"
-                #     f"**Batch**: {b_name}\n\n"
-                #     f"**Uploaded By**: {CR}"
-                # )
                 await asyncio.sleep(4)
                 count +=1
                 continue
@@ -863,7 +831,8 @@ async def txt_handler(bot: Client, m: Message):
                             download_cmd = f"{cmd} -R 25 --fragment-retries 25"
                             os.system(download_cmd)
                             if os.path.exists(f'{name}.pdf'):
-                                sent = await helper.send_doc(bot, m, f'{name}.pdf', cc1, channel_id=channel_id, topic_id=current_topic_id)
+                                #sent = await helper.send_doc(bot, m, f'{name}.pdf', cc1, channel_id=channel_id, topic_id=current_topic_id)
+                                sent = await send_to_channel(bot.send_document, topic_id=current_topic_id, chat_id=channel_id, document=f'{name}.pdf', caption=cc1)
                                 file_id = None
                                 file_type = None
                                 if sent and sent.video:
@@ -902,6 +871,7 @@ async def txt_handler(bot: Client, m: Message):
                     try:
                         await helper.pdf_download(f"{api_url}utkash-ws?url={url}&authorization={api_token}", f"{name}.html")
                         time.sleep(1)
+                        #await send_to_channel(bot.send_document, topic_id=current_topic_id, chat_id=channel_id, document=f'{name}.html', caption=cchtml)
                         await send_to_channel(bot.send_document, topic_id=current_topic_id, chat_id=channel_id, document=f'{name}.html', caption=cchtml)
                         os.remove(f'{name}.html')
                         count += 1
@@ -981,8 +951,10 @@ async def txt_handler(bot: Client, m: Message):
                     
                 elif 'encrypted.m' in url:
                     res_file = await helper.download_and_decrypt_video(url, cmd, name, appxkey)
+                    res_file = filename
                     if res_file:
-                        sent = await helper.send_vid(bot, m, cc, res_file, name, channel_id=channel_id, topic_id=current_topic_id)
+                        #sent = await helper.send_vid(bot, m, cc, res_file, name, channel_id=channel_id, topic_id=current_topic_id)
+                        sent = await helper.send_vid(bot, m, cc, filename, thumb, name, channel_id, topic_id=current_topic_id)
                         file_id = None
                         file_type = None
                         if sent and sent.video:
@@ -1013,8 +985,10 @@ async def txt_handler(bot: Client, m: Message):
                 
                 elif 'drmcdni' in url or 'drm/wv' in url or 'drm/common' in url:
                     res_file = await helper.decrypt_and_merge_video(mpd, keys_string, path, name, raw_text2)
+                    filename = res_file
                     if res_file:
-                        sent = await helper.send_vid(bot, m, cc, res_file, name, channel_id=channel_id, topic_id=current_topic_id)
+                        #sent = await helper.send_vid(bot, m, cc, res_file, name, channel_id=channel_id, topic_id=current_topic_id)
+                        sent = await helper.send_vid(bot, m, cc, filename, thumb, name, channel_id, topic_id=current_topic_id)
                         file_id = None
                         file_type = None
                         if sent and sent.video:
@@ -1045,8 +1019,10 @@ async def txt_handler(bot: Client, m: Message):
                 
                 else:
                     res_file = await helper.download_video(url, cmd, name)
+                    filename = res_file
                     if res_file:
-                        sent = await helper.send_vid(bot, m, cc, res_file, name, channel_id=channel_id, topic_id=current_topic_id)
+                        #sent = await helper.send_vid(bot, m, cc, res_file, name, channel_id=channel_id, topic_id=current_topic_id)
+                        sent = await helper.send_vid(bot, m, cc, filename, thumb, name, channel_id, topic_id=current_topic_id)
                         file_id = None
                         file_type = None
                         if sent and sent.video:
