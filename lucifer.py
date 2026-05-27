@@ -485,33 +485,24 @@ async def send_doc(
     topic_id=None
 ):
 
-    kwargs = dict(
-        chat_id=channel_id,
-        document=file_path,
-        caption=caption
-    )
-
-    if topic_id:
-        kwargs["message_thread_id"]=topic_id
-
     try:
 
         if channel_id:
+            kwargs = dict(
+                chat_id=channel_id,
+                document=file_path,
+                caption=caption
+            )
+
+            if topic_id:
+                kwargs["message_thread_id"] = topic_id
 
             try:
-                sent = await bot.send_document(
-                    **kwargs
-                )
+                sent = await bot.send_document(**kwargs)
 
             except TypeError:
-                kwargs.pop(
-                    "message_thread_id",
-                    None
-                )
-
-                sent = await bot.send_document(
-                    **kwargs
-                )
+                kwargs.pop("message_thread_id", None)
+                sent = await bot.send_document(**kwargs)
 
         else:
             sent = await m.reply_document(
@@ -613,23 +604,22 @@ async def send_vid(
     except:
         dur = None
 
-    kwargs = dict(
-        chat_id=channel_id,
-        video=filename,
-        caption=cc,
-        supports_streaming=True,
-        duration=dur,
-        thumb=thumbnail
-    )
-
-    if topic_id:
-        kwargs["message_thread_id"] = topic_id
-
     try:
         if channel_id:
+            kwargs = dict(
+                chat_id=channel_id,
+                video=filename,
+                caption=cc,
+                supports_streaming=True,
+                duration=dur,
+                thumb=thumbnail
+            )
+
+            if topic_id:
+                kwargs["message_thread_id"] = topic_id
+
             try:
                 sent = await bot.send_video(**kwargs)
-
             except TypeError:
                 kwargs.pop("message_thread_id", None)
                 sent = await bot.send_video(**kwargs)
@@ -646,31 +636,29 @@ async def send_vid(
     except:
 
         try:
-            doc_kwargs = {
-                "chat_id":channel_id,
-                "document":filename,
-                "caption":cc
-            }
+            if channel_id:
+                doc_kwargs = {
+                    "chat_id": channel_id,
+                    "document": filename,
+                    "caption": cc
+                }
 
-            if topic_id:
-                doc_kwargs["message_thread_id"]=topic_id
+                if topic_id:
+                    doc_kwargs["message_thread_id"] = topic_id
 
-            try:
-                sent = await bot.send_document(
-                    **doc_kwargs
-                )
-
-            except TypeError:
-                doc_kwargs.pop(
-                    "message_thread_id",
-                    None
-                )
-                sent = await bot.send_document(
-                    **doc_kwargs
+                try:
+                    sent = await bot.send_document(**doc_kwargs)
+                except TypeError:
+                    doc_kwargs.pop("message_thread_id", None)
+                    sent = await bot.send_document(**doc_kwargs)
+            else:
+                sent = await m.reply_document(
+                    filename,
+                    caption=cc
                 )
 
         except:
-            sent=None
+            sent = None
 
     finally:
 

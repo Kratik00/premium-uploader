@@ -412,9 +412,18 @@ async def txt_handler(bot: Client, m: Message):
     arg = int(raw_text)
     topic_cache = {}
     async def send_to_channel(method, topic_id=None, **kwargs):
-        if topic_id:
+        """Send message with proper error handling for message_thread_id"""
+        if topic_id and kwargs.get("chat_id"):
+            # Only add message_thread_id if we have a valid topic_id
             kwargs["message_thread_id"] = topic_id
-        return await method(**kwargs)
+        try:
+            return await method(**kwargs)
+        except TypeError as e:
+            if "message_thread_id" in str(e):
+                # Chat doesn't support topics, retry without it
+                kwargs.pop("message_thread_id", None)
+                return await method(**kwargs)
+            raise
     try:
         for i in range(arg-1, len(links)):
 
@@ -507,6 +516,11 @@ async def txt_handler(bot: Client, m: Message):
                     except FloodWait as e:
                         print(f"Floodwait: sleeping {e.value}s")
                         await asyncio.sleep(e.value)
+                    except TypeError as e:
+                        if "message_thread_id" in str(e):
+                            current_topic_id = None
+                            continue
+                        raise
 
                 # cc = (
                 #     f"**Index**: {str(count).zfill(3)}\n\n"
@@ -787,8 +801,13 @@ async def txt_handler(bot: Client, m: Message):
                         os.remove(ka)
                     except FloodWait as e:
                         await m.reply_text(str(e))
-                        time.sleep(e.x)
-                        continue    
+                        time.sleep(e.value)
+                        continue
+                    except TypeError as e:
+                        if "message_thread_id" in str(e):
+                            current_topic_id = None
+                            continue
+                        raise
 
                 elif ".pdf" in url:
                     if "cwmediabkt99" in url:
@@ -825,48 +844,57 @@ async def txt_handler(bot: Client, m: Message):
 
                         # Delete all failure messages if the PDF is successfully downloaded
                         for msg in failure_msgs:
-                            await msg.delete()
+                            try:
+                                await msg.delete()
+                            except:
+                                pass
 
                         if not success:
                             # Send the final failure message if all retries fail
-                            await m.reply_text(f"Failed to download PDF after {max_retries} attempts.\n⚠️**Downloading Failed**⚠️\n**Name** =>> {str(count).zfill(3)} {name1}\n**Url** =>> {link0}", disable_web_page_preview)
+                            await m.reply_text(f"Failed to download PDF after {max_retries} attempts.\n⚠️**Downloading Failed**⚠️\n**Name** =>> {str(count).zfill(3)} {name1}\n**Url** =>> {link0}", disable_web_page_preview=True)
+                            count += 1
+                            continue
 
                     else:
                         try:
                             cmd = f'yt-dlp -o "{name}.pdf" "{url}"'
                             download_cmd = f"{cmd} -R 25 --fragment-retries 25"
                             os.system(download_cmd)
-                            sent = await helper.send_doc(bot, m, f'{name}.pdf', cc1, channel_id=channel_id, topic_id=current_topic_id)
-                            file_id = None
-                            file_type = None
-                            if sent and sent.video:
-                                file_id = sent.video.file_id
-                                file_type = "video"
-                            elif sent and sent.document:
-                                file_id = sent.document.file_id
-                                file_type = "document"
-                            if file_id:
-                                try:
-                                    await media_db.update_one(
-                                        {
-                                            "media_url": media_url
-                                        },
-                                        {
-                                            "$set":{
-                                                "file_id": file_id,
-                                                "file_type": file_type,
-                                                "created_at": datetime.utcnow()
-                                             }
-                                        },
-                                           upsert= True
-                                    )
-                                except Exception as db_error:
-                                    print("Mongo Save Error:", db_error)
-                            count += 1
+                            if os.path.exists(f'{name}.pdf'):
+                                sent = await helper.send_doc(bot, m, f'{name}.pdf', cc1, channel_id=channel_id, topic_id=current_topic_id)
+                                file_id = None
+                                file_type = None
+                                if sent and sent.video:
+                                    file_id = sent.video.file_id
+                                    file_type = "video"
+                                elif sent and sent.document:
+                                    file_id = sent.document.file_id
+                                    file_type = "document"
+                                if file_id:
+                                    try:
+                                        await media_db.update_one(
+                                            {
+                                                "media_url": media_url
+                                            },
+                                            {
+                                                "$set":{
+                                                    "file_id": file_id,
+                                                    "file_type": file_type,
+                                                    "created_at": datetime.utcnow()
+                                                 }
+                                            },
+                                               upsert= True
+                                        )
+                                    except Exception as db_error:
+                                        print("Mongo Save Error:", db_error)
+                                count += 1
+                            else:
+                                await m.reply_text(f"Failed to download PDF: {name}")
+                                count += 1
                         except FloodWait as e:
                             await m.reply_text(str(e))
-                            time.sleep(e.x)
-                            continue    
+                            time.sleep(e.value)
+                            continue
 
                 elif ".ws" in url and url.endswith(".ws"):
                     try:
@@ -877,8 +905,13 @@ async def txt_handler(bot: Client, m: Message):
                         count += 1
                     except FloodWait as e:
                         await m.reply_text(str(e))
-                        time.sleep(e.x)
-                        continue    
+                        time.sleep(e.value)
+                        continue
+                    except TypeError as e:
+                        if "message_thread_id" in str(e):
+                            current_topic_id = None
+                            continue
+                        raise
                         
                 elif any(ext in url.lower() for ext in [".jpg", ".jpeg", ".png", ".webp"]):
                     try:
@@ -907,26 +940,41 @@ async def txt_handler(bot: Client, m: Message):
                         os.remove(filename)
 
                     except FloodWait as e:
-                        await asyncio.sleep(e.x)
+                        await asyncio.sleep(e.value)
                         continue
+                    except TypeError as e:
+                        if "message_thread_id" in str(e):
+                            current_topic_id = None
+                            continue
+                        raise
                     except Exception as e:
                         await m.reply_text(f"Error: {e}")
+                        count += 1
 
 
 
                 elif any(ext in url for ext in [".mp3", ".wav", ".m4a"]):
                     try:
-                        ext = url.split('.')[-1]
+                        ext = url.split('.')[-1].split('?')[0]
                         cmd = f'yt-dlp -o "{name}.{ext}" "{url}"'
                         download_cmd = f"{cmd} -R 25 --fragment-retries 25"
                         os.system(download_cmd)
-                        copy = await send_to_channel(bot.send_document, topic_id=current_topic_id, chat_id=channel_id, document=f'{name}.{ext}', caption=ccm)
-                        count += 1
-                        os.remove(f'{name}.{ext}')
+                        if os.path.exists(f'{name}.{ext}'):
+                            copy = await send_to_channel(bot.send_document, topic_id=current_topic_id, chat_id=channel_id, document=f'{name}.{ext}', caption=ccm)
+                            count += 1
+                            os.remove(f'{name}.{ext}')
+                        else:
+                            await m.reply_text(f"Failed to download audio: {name}")
+                            count += 1
                     except FloodWait as e:
                         await m.reply_text(str(e))
-                        time.sleep(e.x)
-                        continue    
+                        time.sleep(e.value)
+                        continue
+                    except TypeError as e:
+                        if "message_thread_id" in str(e):
+                            current_topic_id = None
+                            continue
+                        raise
 
                     
                 elif 'encrypted.m' in url:
