@@ -590,8 +590,6 @@ async def send_vid(bot: Client, m: Message, cc, filename, thumb, name, channel_i
     thread_kwargs = {"message_thread_id": topic_id} if topic_id else {}
 
     thumbnail = f"{filename}.jpg"
-    except Exception as e:
-        await m.reply_text(str(e))
 
     dur = int(duration(filename))
     start_time = time.time()
