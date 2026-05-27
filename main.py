@@ -423,33 +423,32 @@ async def txt_handler(bot: Client, m: Message):
             name = f'{name1[:60]}'
             current_topic_id = None
             if raw_text4.lower() == "yes":
-                if channel_id != m.chat.id:
-                    try:
-                        chat_info = await bot.get_chat(channel_id)
-                        if getattr(chat_info, "is_forum", False):
-                            raw_title = links[i][0]
-                            t_match = re.search(r"[\(\[\{]([^\)\]\}]+)[\)\]\}]", raw_title)
-                            if t_match:
-                                t_name = t_match.group(1).strip()
-                            else:
-                                t_name = "Untitled"
-                            cache_key = f"{channel_id}_{t_name}"
-                            if cache_key in topic_cache:
-                                current_topic_id = topic_cache[cache_key]
-                            else:
-                                api_resp = requests.post(
-                                    f"https://api.telegram.org/bot{BOT_TOKEN}/createForumTopic",
-                                    json={
-                                        "chat_id": channel_id,
-                                        "name": t_name
-                                    }
-                                ).json()
-                                if api_resp.get("ok"):
-                                    current_topic_id = api_resp["result"]["message_thread_id"]
-                                    topic_cache[cache_key] = current_topic_id
-                    except Exception as e:
-                        print(f"Error creating topic: {e}")
-                        current_topic_id = None
+                try:
+                    chat_info = await bot.get_chat(channel_id)
+                    if getattr(chat_info, "is_forum", False):
+                        raw_title = links[i][0]
+                        t_match = re.search(r"[\(\[\{]([^\)\]\}]+)[\)\]\}]", raw_title)
+                        if t_match:
+                            t_name = t_match.group(1).strip()
+                        else:
+                            t_name = "Untitled"
+                        cache_key = f"{channel_id}_{t_name}"
+                        if cache_key in topic_cache:
+                            current_topic_id = topic_cache[cache_key]
+                        else:
+                            api_resp = requests.post(
+                                f"https://api.telegram.org/bot{BOT_TOKEN}/createForumTopic",
+                                json={
+                                    "chat_id": channel_id,
+                                    "name": t_name
+                                }
+                            ).json()
+                            if api_resp.get("ok"):
+                                current_topic_id = api_resp["result"]["message_thread_id"]
+                                topic_cache[cache_key] = current_topic_id
+                except Exception as e:
+                    print(f"Error creating topic: {e}")
+                    current_topic_id = None
                 
             
             media_url = url.split("?")[0]
@@ -491,7 +490,7 @@ async def txt_handler(bot: Client, m: Message):
                         else:
                             await send_to_channel(bot.send_document, topic_id=current_topic_id, chat_id=channel_id, document=cached["file_id"], caption=cc1)
                         break
-                    except Floodwait as e:
+                    except FloodWait as e:
                         print(f"Floodwait: sleeping {e.value}s")
                         await asyncio.sleep(e.value)
 
@@ -1033,8 +1032,10 @@ async def txt_handler(bot: Client, m: Message):
                 continue 
     except Exception as e:
         await m.reply_text(f"{str(e)}")   
+    cancelled = cancel_flags.get(m.chat.id, None)
     cancel_flags.pop(m.chat.id, None)
-    await m.reply_text("Processing completed for all links.")  
+    if not cancelled:
+        await m.reply_text("Processing completed for all links.")  
 
 bot.run()  
             
