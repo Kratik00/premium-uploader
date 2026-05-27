@@ -516,13 +516,35 @@ async def download_video(url,cmd, name):
 
 #     return sent
 
-async def send_doc(bot: Client, m: Message, cc, ka, cc1, count, name, channel_id):
-    start_time = time.time()
-    await bot.send_document(chat_id=channel_id, document=ka, caption=cc1)
-    count+=1
-    time.sleep(1)
-    os.remove(ka)
-    time.sleep(3)
+async def send_doc(bot: Client, m: Message, ka, cc1, channel_id, topic_id=None):
+
+    thread_kwargs = {"message_thread_id": topic_id} if topic_id else {}
+
+    # TELEGRAM FILE_ID SUPPORT
+    if str(ka).startswith(("BAAC", "CAAC")):
+        return await bot.send_document(
+            chat_id=channel_id,
+            document=ka,
+            caption=cc1,
+            **thread_kwargs
+        )
+
+    # LOCAL FILE SUPPORT
+    try:
+        sent = await bot.send_document(
+            chat_id=channel_id,
+            document=ka,
+            caption=cc1,
+            **thread_kwargs
+        )
+
+        await asyncio.sleep(1)
+
+        return sent
+
+    finally:
+        if os.path.exists(ka):
+            os.remove(ka)
 
 def decrypt_file(file_path, key):  
     if not os.path.exists(file_path): 
@@ -585,71 +607,108 @@ async def split_video(filename):
     ])
     return [os.path.join(dir_name, p) for p in parts]
 async def send_vid(bot: Client, m: Message, cc, filename, thumb, name, channel_id, topic_id=None):
-    """Send a video to a channel, optionally inside a forum topic (message_thread_id)."""
-    subprocess.run(f'ffmpeg -i "{filename}" -ss 00:00:10 -vframes 1 "{filename}.jpg"', shell=True)
 
-    # Extra kwarg for forum topic threading
     thread_kwargs = {"message_thread_id": topic_id} if topic_id else {}
+
+    # TELEGRAM FILE_ID SUPPORT
+    if str(filename).startswith(("BAAC", "CAAC")):
+
+        try:
+            return await bot.send_video(
+                channel_id,
+                filename,
+                caption=cc,
+                supports_streaming=True,
+                **thread_kwargs
+            )
+
+        except Exception:
+            return await bot.send_document(
+                channel_id,
+                filename,
+                caption=cc,
+                **thread_kwargs
+            )
+
+    # LOCAL FILE LOGIC
+    subprocess.run(
+        f'ffmpeg -i "{filename}" -ss 00:00:10 -vframes 1 "{filename}.jpg"',
+        shell=True
+    )
 
     thumbnail = f"{filename}.jpg"
 
     dur = int(duration(filename))
-    start_time = time.time()
     file_size = os.path.getsize(filename)
 
     try:
+
         if file_size > MAX_FILE_SIZE_BYTES:
-            # File exceeds 2000 MB — split it into parts
-            split_msg = await m.reply_text(f"⚠️ File size is **{file_size // (1024*1024)} MB**, splitting into parts...")
+
+            split_msg = await m.reply_text(
+                f"⚠️ File size is **{file_size // (1024*1024)} MB**, splitting..."
+            )
+
             parts = await split_video(filename)
+
             await split_msg.delete()
+
             if not parts:
-                await m.reply_text("❌ Splitting failed, attempting to send original file...")
                 parts = [filename]
+
             for idx, part_file in enumerate(parts, start=1):
-                part_caption = f"{cc}\n\n📦 **Part {idx}/{len(parts)}**"
-                part_dur = int(duration(part_file))
-                start_time = time.time()
+
+                part_caption = f"{cc}\n\n📦 Part {idx}/{len(parts)}"
+
                 try:
                     await bot.send_video(
-                        channel_id, part_file,
+                        channel_id,
+                        part_file,
                         caption=part_caption,
                         supports_streaming=True,
-                        height=720, width=1280,
                         thumb=thumbnail,
-                        duration=part_dur,
+                        duration=int(duration(part_file)),
                         **thread_kwargs
                     )
+
                 except Exception:
+
                     await bot.send_document(
-                        channel_id, part_file,
+                        channel_id,
+                        part_file,
                         caption=part_caption,
                         **thread_kwargs
                     )
+
                 if part_file != filename and os.path.exists(part_file):
                     os.remove(part_file)
+
         else:
-            # File is within limit — send normally
+
             try:
-                await bot.send_video(
-                    channel_id, filename,
+                return await bot.send_video(
+                    channel_id,
+                    filename,
                     caption=cc,
                     supports_streaming=True,
-                    height=720, width=1280,
                     thumb=thumbnail,
                     duration=dur,
                     **thread_kwargs
                 )
+
             except Exception:
-                await bot.send_document(
-                    channel_id, filename,
+
+                return await bot.send_document(
+                    channel_id,
+                    filename,
                     caption=cc,
                     **thread_kwargs
                 )
+
     finally:
+
         if os.path.exists(filename):
             os.remove(filename)
-        thumb_path = f"{filename}.jpg"
-        if os.path.exists(thumb_path):
-            os.remove(thumb_path)
 
+        if os.path.exists(thumbnail):
+            os.remove(thumbnail)
