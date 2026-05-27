@@ -476,45 +476,53 @@ async def download_video(url,cmd, name):
 
 #     return sent
 
-async def send_doc(
-    bot,
-    m,
-    file_path,
-    caption,
-    channel_id=None,
-    topic_id=None
-):
+# async def send_doc(
+#     bot,
+#     m,
+#     file_path,
+#     caption,
+#     channel_id=None,
+#     topic_id=None
+# ):
 
-    try:
+#     try:
 
-        if channel_id:
-            kwargs = dict(
-                chat_id=channel_id,
-                document=file_path,
-                caption=caption
-            )
+#         if channel_id:
+#             kwargs = dict(
+#                 chat_id=channel_id,
+#                 document=file_path,
+#                 caption=caption
+#             )
 
-            if topic_id:
-                kwargs["message_thread_id"] = topic_id
+#             if topic_id:
+#                 kwargs["message_thread_id"] = topic_id
 
-            try:
-                sent = await bot.send_document(**kwargs)
+#             try:
+#                 sent = await bot.send_document(**kwargs)
 
-            except TypeError:
-                kwargs.pop("message_thread_id", None)
-                sent = await bot.send_document(**kwargs)
+#             except TypeError:
+#                 kwargs.pop("message_thread_id", None)
+#                 sent = await bot.send_document(**kwargs)
 
-        else:
-            sent = await m.reply_document(
-                file_path,
-                caption=caption
-            )
+#         else:
+#             sent = await m.reply_document(
+#                 file_path,
+#                 caption=caption
+#             )
 
-    finally:
-        if os.path.exists(file_path):
-            os.remove(file_path)
+#     finally:
+#         if os.path.exists(file_path):
+#             os.remove(file_path)
 
-    return sent
+#     return sent
+
+async def send_doc(bot: Client, m: Message, cc, ka, cc1, count, name, channel_id):
+    start_time = time.time()
+    await bot.send_document(chat_id=channel_id, document=ka, caption=cc1)
+    count+=1
+    time.sleep(1)
+    os.remove(ka)
+    time.sleep(3)
 
 def decrypt_file(file_path, key):  
     if not os.path.exists(file_path): 
@@ -539,133 +547,109 @@ async def download_and_decrypt_video(url, cmd, name, key):
             print(f"Failed to decrypt {video_path}.")  
             return None  
 
-# async def send_vid(bot: Client, m: Message, cc, filename, name):
+async def split_video(filename):
+    """Split a video into parts of ~1999 MB each using ffmpeg segment muxer."""
+    base, ext = os.path.splitext(filename)
+    pattern = f"{base}_part%03d{ext}"
 
-#     # 🔹 Generate thumbnail at 2 seconds (safer than 10s)
-#     subprocess.run(
-#         f'ffmpeg -i "{filename}" -ss 00:00:10 -vframes 1 "{filename}.jpg"',
-#         shell=True
-#     )
+    # Calculate how many parts we need based on file size
+    file_size = os.path.getsize(filename)
+    part_size = 1999 * 1024 * 1024  # 1999 MB in bytes
+    num_parts = ceil(file_size / part_size)
 
-#     thumbnail = None
-#     if os.path.exists(f"{filename}.jpg"):
-#         thumbnail = f"{filename}.jpg"
-
-#     # 🔹 Get duration safely
-#     try:
-#         dur = int(duration(filename))
-#     except:
-#         dur = None
-
-#     try:
-#         sent = await m.reply_video(
-#             filename,
-#             caption=cc,
-#             supports_streaming=True,
-#             duration=dur,
-#             thumb=thumbnail
-#         )
-
-#     except Exception:
-#         # fallback if video fails
-#         sent = await m.reply_document(
-#             filename,
-#             caption=cc
-#         )
-
-#     finally:
-#         if os.path.exists(filename):
-#             os.remove(filename)
-
-#         if thumbnail and os.path.exists(thumbnail):
-#             os.remove(thumbnail)
-
-#     return sent
-async def send_vid(
-    bot: Client,
-    m: Message,
-    cc,
-    filename,
-    name,
-    channel_id=None,
-    topic_id=None
-):
-    subprocess.run(
-        f'ffmpeg -i "{filename}" -ss 00:00:10 -vframes 1 "{filename}.jpg"',
-        shell=True
+    # Get total duration using ffprobe
+    result = subprocess.run(
+        ["ffprobe", "-v", "error", "-show_entries", "format=duration",
+         "-of", "default=noprint_wrappers=1:nokey=1", filename],
+        stdout=subprocess.PIPE, stderr=subprocess.STDOUT
     )
+    total_duration = float(result.stdout.strip() or 0)
 
-    thumbnail = None
-    if os.path.exists(f"{filename}.jpg"):
-        thumbnail = f"{filename}.jpg"
+    # Calculate duration per part proportionally
+    part_duration_secs = int(total_duration / num_parts) if num_parts > 1 else int(total_duration)
+
+    cmd = (
+        f'ffmpeg -i "{filename}" -c copy -map 0 '
+        f'-segment_time {part_duration_secs} -f segment -reset_timestamps 1 '
+        f'"{pattern}" -y'
+    )
+    subprocess.run(cmd, shell=True)
+
+    # Collect generated part files in order
+    dir_name = os.path.dirname(filename) or "."
+    parts = sorted([
+        f for f in os.listdir(dir_name)
+        if os.path.basename(f).startswith(os.path.basename(base) + "_part") and f.endswith(ext)
+    ])
+    return [os.path.join(dir_name, p) for p in parts]
+async def send_vid(bot: Client, m: Message, cc, filename, thumb, name, channel_id, topic_id=None):
+    """Send a video to a channel, optionally inside a forum topic (message_thread_id)."""
+    subprocess.run(f'ffmpeg -i "{filename}" -ss 00:00:10 -vframes 1 "{filename}.jpg"', shell=True)
+
+    # Extra kwarg for forum topic threading
+    thread_kwargs = {"message_thread_id": topic_id} if topic_id else {}
+
+    thumbnail = f"{filename}.jpg"
+    except Exception as e:
+        await m.reply_text(str(e))
+
+    dur = int(duration(filename))
+    start_time = time.time()
+    file_size = os.path.getsize(filename)
 
     try:
-        dur = int(duration(filename))
-    except:
-        dur = None
-
-    try:
-        if channel_id:
-            kwargs = dict(
-                chat_id=channel_id,
-                video=filename,
-                caption=cc,
-                supports_streaming=True,
-                duration=dur,
-                thumb=thumbnail
-            )
-
-            if topic_id:
-                kwargs["message_thread_id"] = topic_id
-
-            try:
-                sent = await bot.send_video(**kwargs)
-            except TypeError:
-                kwargs.pop("message_thread_id", None)
-                sent = await bot.send_video(**kwargs)
-
-        else:
-            sent = await m.reply_video(
-                filename,
-                caption=cc,
-                supports_streaming=True,
-                duration=dur,
-                thumb=thumbnail
-            )
-
-    except:
-
-        try:
-            if channel_id:
-                doc_kwargs = {
-                    "chat_id": channel_id,
-                    "document": filename,
-                    "caption": cc
-                }
-
-                if topic_id:
-                    doc_kwargs["message_thread_id"] = topic_id
-
+        if file_size > MAX_FILE_SIZE_BYTES:
+            # File exceeds 2000 MB — split it into parts
+            split_msg = await m.reply_text(f"⚠️ File size is **{file_size // (1024*1024)} MB**, splitting into parts...")
+            parts = await split_video(filename)
+            await split_msg.delete()
+            if not parts:
+                await m.reply_text("❌ Splitting failed, attempting to send original file...")
+                parts = [filename]
+            for idx, part_file in enumerate(parts, start=1):
+                part_caption = f"{cc}\n\n📦 **Part {idx}/{len(parts)}**"
+                part_dur = int(duration(part_file))
+                start_time = time.time()
                 try:
-                    sent = await bot.send_document(**doc_kwargs)
-                except TypeError:
-                    doc_kwargs.pop("message_thread_id", None)
-                    sent = await bot.send_document(**doc_kwargs)
-            else:
-                sent = await m.reply_document(
-                    filename,
-                    caption=cc
+                    await bot.send_video(
+                        channel_id, part_file,
+                        caption=part_caption,
+                        supports_streaming=True,
+                        height=720, width=1280,
+                        thumb=thumbnail,
+                        duration=part_dur,
+                        **thread_kwargs
+                    )
+                except Exception:
+                    await bot.send_document(
+                        channel_id, part_file,
+                        caption=part_caption,
+                        **thread_kwargs
+                    )
+                if part_file != filename and os.path.exists(part_file):
+                    os.remove(part_file)
+        else:
+            # File is within limit — send normally
+            try:
+                await bot.send_video(
+                    channel_id, filename,
+                    caption=cc,
+                    supports_streaming=True,
+                    height=720, width=1280,
+                    thumb=thumbnail,
+                    duration=dur,
+                    **thread_kwargs
                 )
-
-        except:
-            sent = None
-
+            except Exception:
+                await bot.send_document(
+                    channel_id, filename,
+                    caption=cc,
+                    **thread_kwargs
+                )
     finally:
-
         if os.path.exists(filename):
             os.remove(filename)
+        thumb_path = f"{filename}.jpg"
+        if os.path.exists(thumb_path):
+            os.remove(thumb_path)
 
-        if thumbnail and os.path.exists(thumbnail):
-            os.remove(thumbnail)
-
-    return sent
