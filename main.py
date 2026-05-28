@@ -325,15 +325,21 @@ async def txt_handler(bot: Client, m: Message):
         return
     
     await editable.edit(
-        f"🧾 Enter input in the following lines:\n\n"
-        "1️⃣ Index (e.g. 1 or 1-{len(links)})\n"
-        "2️⃣ Batch name (0 to skip)\n"
-        "3️⃣ Resolution (360/480/720)\n"
-        "4️⃣ Credit (0 to default)\n"
-        "4️⃣ Topic Upload? (yes or no)\n"
-        "4️⃣ Channel id ?"
-
+        f"🧾 Please provide the following details in separate lines:\n\n"
+        f"1️⃣ Index Range\n"
+        f"   • Example: `1` or `1-{len(links)}`\n\n"
+        f"2️⃣ Batch Name\n"
+        f"   • Enter `0` to skip\n\n"
+        f"3️⃣ Resolution\n"
+        f"   • Available: `360`, `480`, `720`\n\n"
+        f"4️⃣ Credit Name\n"
+        f"   • Enter `0` to use default credit\n\n"
+        f"5️⃣ Upload to Topic?\n"
+        f"   • Reply with `yes` or `no`\n\n"
+        f"6️⃣ Channel ID\n"
+        f"   • Example: `-100xxxxxxxxxx`"
     )
+    
     try:
         input_all: Message = await bot.listen(
             editable.chat.id,
@@ -386,7 +392,7 @@ async def txt_handler(bot: Client, m: Message):
     res = quality_map.get(raw_text2, "UN")
     
     if raw_text3 == "0":
-        CR = '[LUCIFER](https://t.me/NOOBHUSIR)'
+        CR = '[〲𝕷𝖚𝔠𝔦𝔣𝔢𝔯🌸](https://t.me/NOOBHUSIR)'
     else:
         CR = raw_text3
         
@@ -406,7 +412,9 @@ async def txt_handler(bot: Client, m: Message):
             pass
 
     failed_count = 0
-    count =int(raw_text)    
+    success_count = 0
+    total_count = len(links)
+    count = int(raw_text)    
     arg = int(raw_text)
     topic_cache = {}
     async def send_to_channel(method, topic_id=None, **kwargs):
@@ -689,8 +697,6 @@ async def txt_handler(bot: Client, m: Message):
                 with requests.Session() as session:
                     url = helper.get_m3u8(session, url)
 
- #   print("Vimeo extracted:", url)
-
             if "youtu" in url:
                 ytf = f"b[height<={raw_text2}][ext=mp4]/bv[height<={raw_text2}][ext=mp4]+ba[ext=m4a]/b[ext=mp4]"
             elif "embed" in url:
@@ -720,7 +726,6 @@ async def txt_handler(bot: Client, m: Message):
                 cmd = f'yt-dlp -f "{ytf}" "{url}" -o "{name}.mp4"'
 
             try:
-                # cc = f"**╭━━━━━ INFO ━━━━━╮**\n💫 **Video ID:** `{str(count).zfill(3)}`\n**╰━━━━━━━━━━━━━━╯**\n\n📁 **Title:** `{name1} ({res}) lucifer.mkv`\n📚 **Course:** `{b_name}`\n\n⚡ **Downloaded By:** {CR}"
                 if current_topic_id:
                     cc = (
                         f"**Index**: {str(count).zfill(3)}\n\n"
@@ -743,17 +748,12 @@ async def txt_handler(bot: Client, m: Message):
                         f"**Batch**: {b_name}\n\n"
                         f"**Uploaded By**: {CR}"
                     )
-                # cc1 = f"<blockquote>╭━━━━━ INFO ━━━━━╮\n💫 <b>File ID:</b> <b>{str(count).zfill(3)}</b>\n╰━━━━━━━━━━━━━━╯\n\n📁 <b>Title:</b> <b>{name1} lucifer.pdf</b>\n📚 <b>Course:</b> <b>{b_name}</b>\n\n⚡ **Downloaded By:** {CR}</blockquote>"
-                #cczip = f"**——— ✦ {str(count).zfill(3)} ✦ ———**\n\n📁 **Title:** `{name1}.zip`\n📚 **Course:** `{b_name}`\n\n⚡ **Extracted By:** {CR}"
                     cc1 = (
                         f"**Index**: {str(count).zfill(3)}\n\n"
                         f"**Title**: {name1}.pdf\n\n"
                         f"**Batch**: {b_name}\n\n"
                         f"**Uploaded By**: {CR}"
                     )
-                # ccimg = f"**╭━━━━ IMAGE ━━━━╮**\n💫 **Image ID:** `{str(count).zfill(3)}`\n**╰━━━━━━━━━━━━━━╯**\n\n📁 **Title:** `{name1} lucifer.JPG`\n📚 **Course:** `{b_name}`\n\n⚡ **Downloaded By:** {CR}"
-                # ccm = f"**——— ✦ {str(count).zfill(3)} ✦ ———**\n\n🎵 **Title:** `{name1}.mp3`\n📚 **Course:** `{b_name}`\n\n⚡ **Extracted By:** {CR}"
-                # cchtml = f"**——— ✦ {str(count).zfill(3)} ✦ ———**\n\n🌐 **Title:** `{name1}.html`\n📚 **Course:** `{b_name}`\n\n⚡ **Extracted By:** {CR}"
                 ccimg = (
                     f"**Title**: {name1}.jpg\n"
                 )
@@ -775,6 +775,7 @@ async def txt_handler(bot: Client, m: Message):
                         ka = await helper.download(url, name)
                         copy = await send_to_channel(bot.send_document, topic_id=current_topic_id, chat_id=channel_id, document=ka, caption=cc1)
                         count += 1
+                        success_count += 1
                         os.remove(ka)
                     except FloodWait as e:
                         await m.reply_text(str(e))
@@ -806,6 +807,7 @@ async def txt_handler(bot: Client, m: Message):
                                     await asyncio.sleep(retry_delay)  # Optional, to prevent spamming
                                     copy = await send_to_channel(bot.send_document, topic_id=current_topic_id, chat_id=channel_id, document=f'{name}.pdf', caption=cc1)
                                     count += 1
+                                    success_count += 1
                                     os.remove(f'{name}.pdf')
                                     success = True
                                     break  # Exit the retry loop if successful
@@ -819,7 +821,6 @@ async def txt_handler(bot: Client, m: Message):
                                 await asyncio.sleep(retry_delay)
                                 continue  # Retry the next attempt if an exception occurs
 
-                        # Delete all failure messages if the PDF is successfully downloaded
                         for msg in failure_msgs:
                             try:
                                 await msg.delete()
@@ -827,7 +828,6 @@ async def txt_handler(bot: Client, m: Message):
                                 pass
 
                         if not success:
-                            # Send the final failure message if all retries fail
                             await m.reply_text(f"Failed to download PDF after {max_retries} attempts.\n⚠️**Downloading Failed**⚠️\n**Name** =>> {str(count).zfill(3)} {name1}\n**Url** =>> {link0}", disable_web_page_preview=True)
                             count += 1
                             continue
@@ -838,7 +838,6 @@ async def txt_handler(bot: Client, m: Message):
                             download_cmd = f"{cmd} -R 25 --fragment-retries 25"
                             os.system(download_cmd)
                             if os.path.exists(f'{name}.pdf'):
-                                #sent = await helper.send_doc(bot, m, f'{name}.pdf', cc1, channel_id=channel_id, topic_id=current_topic_id)
                                 sent = await send_to_channel(bot.send_document, topic_id=current_topic_id, chat_id=channel_id, document=f'{name}.pdf', caption=cc1)
                                 file_id = None
                                 file_type = None
@@ -866,9 +865,11 @@ async def txt_handler(bot: Client, m: Message):
                                     except Exception as db_error:
                                         print("Mongo Save Error:", db_error)
                                 count += 1
+                                success_count += 1
                             else:
                                 await m.reply_text(f"Failed to download PDF: {name}")
                                 count += 1
+                                failed_count += 1
                         except FloodWait as e:
                             await m.reply_text(str(e))
                             time.sleep(e.value)
@@ -878,10 +879,10 @@ async def txt_handler(bot: Client, m: Message):
                     try:
                         await helper.pdf_download(f"{api_url}utkash-ws?url={url}&authorization={api_token}", f"{name}.html")
                         time.sleep(1)
-                        #await send_to_channel(bot.send_document, topic_id=current_topic_id, chat_id=channel_id, document=f'{name}.html', caption=cchtml)
                         await send_to_channel(bot.send_document, topic_id=current_topic_id, chat_id=channel_id, document=f'{name}.html', caption=cchtml)
                         os.remove(f'{name}.html')
                         count += 1
+                        success_count += 1
                     except FloodWait as e:
                         await m.reply_text(str(e))
                         time.sleep(e.value)
@@ -916,6 +917,7 @@ async def txt_handler(bot: Client, m: Message):
 
                         copy = await send_to_channel(bot.send_document, topic_id=current_topic_id, chat_id=channel_id, document=filename, caption=ccimg)
                         count += 1
+                        success_count += 1
                         os.remove(filename)
 
                     except FloodWait as e:
@@ -929,6 +931,7 @@ async def txt_handler(bot: Client, m: Message):
                     except Exception as e:
                         await m.reply_text(f"Error: {e}")
                         count += 1
+                        failed_count += 1
 
 
 
@@ -941,10 +944,12 @@ async def txt_handler(bot: Client, m: Message):
                         if os.path.exists(f'{name}.{ext}'):
                             copy = await send_to_channel(bot.send_document, topic_id=current_topic_id, chat_id=channel_id, document=f'{name}.{ext}', caption=ccm)
                             count += 1
+                            success_count += 1
                             os.remove(f'{name}.{ext}')
                         else:
                             await m.reply_text(f"Failed to download audio: {name}")
                             count += 1
+                            failed_count += 1
                     except FloodWait as e:
                         await m.reply_text(str(e))
                         time.sleep(e.value)
@@ -960,7 +965,6 @@ async def txt_handler(bot: Client, m: Message):
                     res_file = await helper.download_and_decrypt_video(url, cmd, name, appxkey)
                     res_file = filename
                     if res_file:
-                        #sent = await helper.send_vid(bot, m, cc, res_file, name, channel_id=channel_id, topic_id=current_topic_id)
                         sent = await helper.send_vid(bot, m, cc, filename, thumb, name, channel_id, topic_id=current_topic_id)
                         file_id = None
                         file_type = None
@@ -988,13 +992,13 @@ async def txt_handler(bot: Client, m: Message):
                             except Exception as db_error:
                                 print("Mongo Save Error:", db_error)
                         count += 1
+                        success_count += 1
                     continue
                 
                 elif 'drmcdni' in url or 'drm/wv' in url or 'drm/common' in url:
                     res_file = await helper.decrypt_and_merge_video(mpd, keys_string, path, name, raw_text2)
                     filename = res_file
                     if res_file:
-                        #sent = await helper.send_vid(bot, m, cc, res_file, name, channel_id=channel_id, topic_id=current_topic_id)
                         sent = await helper.send_vid(bot, m, cc, filename, thumb, name, channel_id, topic_id=current_topic_id)
                         file_id = None
                         file_type = None
@@ -1022,13 +1026,13 @@ async def txt_handler(bot: Client, m: Message):
                             except Exception as db_error:
                                 print("Mongo Save Error:", db_error)
                         count += 1   
+                        success_count += 1
                     continue
                 
                 else:
                     res_file = await helper.download_video(url, cmd, name)
                     filename = res_file
                     if res_file:
-                        #sent = await helper.send_vid(bot, m, cc, res_file, name, channel_id=channel_id, topic_id=current_topic_id)
                         sent = await helper.send_vid(bot, m, cc, filename, thumb, name, channel_id, topic_id=current_topic_id)
                         file_id = None
                         file_type = None
@@ -1056,6 +1060,7 @@ async def txt_handler(bot: Client, m: Message):
                             except Exception as db_error:
                                 print("Mongo Save Error:", db_error)
                         count += 1
+                        success_count += 1
                     continue
             except Exception as e:
                 if current_topic_id:
@@ -1076,13 +1081,20 @@ async def txt_handler(bot: Client, m: Message):
                         f"**Error:** {str(e)}"
                     )
                 await m.reply_text(error_msg, disable_web_page_preview=True)
+                count += 1
+                failed_count +=1
                 continue 
     except Exception as e:
         await m.reply_text(f"{str(e)}")   
     cancelled = cancel_flags.get(m.chat.id, None)
     cancel_flags.pop(m.chat.id, None)
     if not cancelled:
-        await m.reply_text("Processing completed for all links.")  
-
+        await m.reply_text(
+            f"✅ Upload Task Completed\n\n"
+            f"📦 Batch: {b_name}\n"
+            f"☑️ Successful: {success_count}\n"
+            f"❌ Failed: {failed_count}\n"
+            f"📚 Total: {total_count}"
+        )
 bot.run()  
             
