@@ -1107,6 +1107,8 @@ async def txt_handler(bot: Client, m: Message):
                 count += 1
                 failed_count +=1
                 continue 
+    except Exception as e:
+        await m.reply_text(f"{str(e)}")  
     if last_topic:
         try:
             await bot.send_message(
@@ -1115,9 +1117,7 @@ async def txt_handler(bot: Client, m: Message):
                 message_thread_id=last_topic_id if last_topic_id else None
             )
         except:
-            pass
-    except Exception as e:
-        await m.reply_text(f"{str(e)}")   
+            pass 
     cancelled = cancel_flags.get(m.chat.id, None)
     cancel_flags.pop(m.chat.id, None)
     if not cancelled:
