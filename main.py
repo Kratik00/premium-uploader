@@ -138,7 +138,16 @@ async def check_premium_access(bot: Client, m: Message):
         return False
 
     return False
+@bot.on_message(filters.command(["id"]))
+async def id_command(client, message: Message):
+    keyboard = InlineKeyboardMarkup([[InlineKeyboardButton(text="Send to Owner", url=f"tg://openmessage?user_id={OWNER_ID}")]])
+    chat_id = message.chat.id
+    text = f"<blockquote expandable><b>The ID of this chat id is:</b></blockquote>\n`{chat_id}`"
     
+    if str(chat_id).startswith("-100"):
+        await message.reply_text(text)
+    else:
+        await message.reply_text(text, reply_markup=keyboard)   
 @bot.on_message(filters.command("cookies") & filters.private)
 async def cookies_handler(client: Client, m: Message):
     await m.reply_text(
@@ -417,6 +426,8 @@ async def txt_handler(bot: Client, m: Message):
     count = int(raw_text)    
     arg = int(raw_text)
     topic_cache = {}
+    last_topic = None
+    last_topic_id = None
     async def send_to_channel(method, topic_id=None, **kwargs):
         """Send to channel, injecting message_thread_id when topic_id is set."""
         if topic_id:
@@ -472,7 +483,18 @@ async def txt_handler(bot: Client, m: Message):
                 v_name = name1
             
                 
-            
+            if last_topic and last_topic != t_name:
+                try:
+                    await bot.send_message(
+                        channel_id,
+                        f"✅ {last_topic} Done",
+                        message_thread_id=last_topic_id if last_topic_id else None
+                    )
+                except:
+                    pass
+
+            last_topic = t_name
+            last_topic_id = current_topic_id
             media_url = url.split("?")[0]
 
             cached = await media_db.find_one({"media_url": media_url})
@@ -522,6 +544,7 @@ async def txt_handler(bot: Client, m: Message):
                         raise
                 await asyncio.sleep(4)
                 count +=1
+                success_count += 1
                 continue
                 
             
@@ -1084,6 +1107,15 @@ async def txt_handler(bot: Client, m: Message):
                 count += 1
                 failed_count +=1
                 continue 
+    if last_topic:
+        try:
+            await bot.send_message(
+                channel_id,
+                f"✅ {last_topic} Done",
+                message_thread_id=last_topic_id if last_topic_id else None
+            )
+        except:
+            pass
     except Exception as e:
         await m.reply_text(f"{str(e)}")   
     cancelled = cancel_flags.get(m.chat.id, None)
