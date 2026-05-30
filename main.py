@@ -752,14 +752,14 @@ async def txt_handler(bot: Client, m: Message):
                 if current_topic_id:
                     cc = (
                         f"**Index**: {str(count).zfill(3)}\n\n"
-                        f"**Title**: {name1}.mp4\n\n"
+                        f"**Title**: {v_name}.mp4\n\n"
                         f"**Batch**: {b_name}\n\n"
                         f"**Topic**: {t_name}\n\n"
                         f"**Uploaded By**: {CR}"
                     )
                     cc1 = (
                         f"**Index**: {str(count).zfill(3)}\n\n"
-                        f"**Title**: {name1}.pdf\n\n"
+                        f"**Title**: {v_name}.pdf\n\n"
                         f"**Batch**: {b_name}\n\n"
                         f"**Topic**: {t_name}\n\n"
                         f"**Uploaded By**: {CR}"
