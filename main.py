@@ -320,7 +320,7 @@ async def txt_handler(bot: Client, m: Message):
             if "://" in i:
                 url = i.split("://", 1)[1]
                 links.append(i.split("://", 1))
-                if ".store.adda247.com" in i:
+                if "store.adda247.com" in i:
                     adda247_found = True
                 if ".pdf" in url:
                     pdf_count += 1
@@ -385,7 +385,7 @@ async def txt_handler(bot: Client, m: Message):
     if adda247_found:
         jwt_msg = await bot.ask(
             m.chat.id,
-            "__Adda247 link detected.\n\nSend purchased token for downloading pdf."
+            "__Adda247 link detected.\n\nSend purchased token for downloading pdf.__"
         )
         raw_text8 = jwt_msg.text.strip()
         try:
