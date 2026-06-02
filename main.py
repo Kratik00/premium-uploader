@@ -383,13 +383,21 @@ async def txt_handler(bot: Client, m: Message):
     channel_id = int(raw_text6)
     raw_text8 = None
     if adda247_found:
-        jwt_msg = await bot.ask(
+        prompt_msg = await bot.send_message(
             m.chat.id,
             "__Adda247 link detected.\n\nSend purchased token for downloading pdf.__"
+        )
+        jwt_msg = await bot.listen(
+            m.chat.id,
+            filters=filters.user(m.from_user.id)
         )
         raw_text8 = jwt_msg.text.strip()
         try:
             await jwt_msg.delete()
+        except:
+            pass
+        try:
+            await prompt_msg.delete()
         except:
             pass
     
@@ -850,15 +858,15 @@ async def txt_handler(bot: Client, m: Message):
                                 "x-jwt-token": raw_text8
                             }
                             response = requests.get(url, headers=headers, stream=True)
-                            with open(f"{name}.pdf", "wb") as f:
+                            with open(f"{v_name}.pdf", "wb") as f:
                                 for chunk in response.iter_content(chunk_size=1024*1024):
                                     if chunk:
                                         f.write(chunk)
-                            sent = await send_to_channel(bot.send_document, topic_id=current_topic_id, chat_id=channel_id, document=f'{name}.pdf', caption=cc1)
+                            sent = await send_to_channel(bot.send_document, topic_id=current_topic_id, chat_id=channel_id, document=f'{v_name}.pdf', caption=cc1)
                             count += 1
                             success_count += 1
-                            if os.path.exists(f"{name}.pdf"):
-                                os.remove(f"{name}.pdf")
+                            if os.path.exists(f"{v_name}.pdf"):
+                                os.remove(f"{v_name}.pdf")
                         except Exception as e:
                             await m.reply_text(f"Adda247 pdf error: {e}")
                             count += 1
