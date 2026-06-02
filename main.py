@@ -387,11 +387,11 @@ async def txt_handler(bot: Client, m: Message):
             m.chat.id,
             "__Adda247 link detected.\n\nSend purchased token for downloading pdf."
         )
-            raw_text8 = jwt_msg.text.strip()
-            try:
-                await jwt_msg.delete()
-            except:
-                pass
+        raw_text8 = jwt_msg.text.strip()
+        try:
+            await jwt_msg.delete()
+        except:
+            pass
     
     count = int(raw_text)
     arg = int(raw_text)
