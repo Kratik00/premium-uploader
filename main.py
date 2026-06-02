@@ -379,8 +379,10 @@ async def txt_handler(bot: Client, m: Message):
     raw_text3 = data[3].strip()
     raw_text5 = data[4].strip()
     raw_text6 = data[5].strip()
-
-    channel_id = int(raw_text6)
+    if raw_text5.lower() == "no":
+        channel_id = m.chat.id
+    else:
+        channel_id = int(raw_text6)
     raw_text8 = None
     if adda247_found:
         prompt_msg = await bot.send_message(
@@ -467,6 +469,9 @@ async def txt_handler(bot: Client, m: Message):
 
             name1 = links[i][0].replace("(", "[").replace(")", "]").replace("_", "").replace("\t", "").replace(":", "").replace("/", "").replace("+", "").replace("#", "").replace("|", "").replace("@", "").replace("*", "").replace(".", "").replace("https", "").replace("http", "").strip()
             name = f'{name1[:60]}'
+            t_name = "General"
+            v_name = name1
+            current_topic_id = None
             try:
                 # ── Determine topic_id for forum/topic channels ───────────────────
                 current_topic_id = None  # None = regular channel (no topic threading)
