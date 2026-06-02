@@ -843,7 +843,7 @@ async def txt_handler(bot: Client, m: Message):
                             current_topic_id = None
                             continue
                         raise
-                elif ".store.adda247.com" in url:
+                elif "store.adda247.com" in url:
                         try:
                             headers = {
                                 "User-Agent": "Mozilla/5.0",
