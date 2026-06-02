@@ -784,7 +784,7 @@ async def txt_handler(bot: Client, m: Message):
                     continue
                     
            
-            if "jw-prod" in url:
+            if "jw-prod" or "stream" in url:
                 cmd = f'yt-dlp -o "{name}.mp4" "{url}"'
             elif ".m3u8.m3u8" in url or ".m3u8" in url:
                 cmd = f'yt-dlp -o "{name}.mp4" "{url}"'
