@@ -558,8 +558,6 @@ async def txt_handler(bot: Client, m: Message):
                     try:
                         if cached["file_type"] == "video": 
                             await helper.send_vid(bot, m, cc, cached["file_id"], thumb, name, channel_id, topic_id=current_topic_id)
-                        else: 
-                            await helper.send_doc(bot, m, cached["file_id"], cc1, channel_id=channel_id, topic_id=current_topic_id)
                         break
                     except FloodWait as e:
                         print(f"Floodwait: sleeping {e.value}s")
@@ -928,31 +926,6 @@ async def txt_handler(bot: Client, m: Message):
                             os.system(download_cmd)
                             if os.path.exists(f'{name}.pdf'):
                                 sent = await send_to_channel(bot.send_document, topic_id=current_topic_id, chat_id=channel_id, document=f'{name}.pdf', caption=cc1)
-                                file_id = None
-                                file_type = None
-                                if sent and sent.video:
-                                    file_id = sent.video.file_id
-                                    file_type = "video"
-                                elif sent and sent.document:
-                                    file_id = sent.document.file_id
-                                    file_type = "document"
-                                if file_id:
-                                    try:
-                                        await media_db.update_one(
-                                            {
-                                                "media_url": media_url
-                                            },
-                                            {
-                                                "$set":{
-                                                    "file_id": file_id,
-                                                    "file_type": file_type,
-                                                    "created_at": datetime.utcnow()
-                                                 }
-                                            },
-                                               upsert= True
-                                        )
-                                    except Exception as db_error:
-                                        print("Mongo Save Error:", db_error)
                                 count += 1
                                 success_count += 1
                             else:
