@@ -752,7 +752,7 @@ async def txt_handler(bot: Client, m: Message):
                         data = await resp.json()
                 stream_url = data.get("link")
                 if stream_url:
-                    url = f"https://luciferbypass.mrlucifer.workers.dev/?stream={url}"
+                    url = f"https://luciferbypass.mrlucifer.workers.dev/?stream={stream_url}"
 
             elif "raonetech.online/get/appx-pdf/" in url:
                 async with ClientSession() as session:
