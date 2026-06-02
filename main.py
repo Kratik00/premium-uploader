@@ -308,6 +308,7 @@ async def txt_handler(bot: Client, m: Message):
     img_count = 0
     zip_count = 0
     other_count = 0
+    adda247_found = None
     
     try:    
         with open(x, "r") as f:
@@ -319,6 +320,8 @@ async def txt_handler(bot: Client, m: Message):
             if "://" in i:
                 url = i.split("://", 1)[1]
                 links.append(i.split("://", 1))
+                if ".store.adda247.com" in i:
+                    adda247_found = True
                 if ".pdf" in url:
                     pdf_count += 1
                 elif url.endswith((".png", ".jpeg", ".jpg")):
@@ -378,6 +381,17 @@ async def txt_handler(bot: Client, m: Message):
     raw_text6 = data[5].strip()
 
     channel_id = int(raw_text6)
+    raw_text8 = None
+    if adda247_found:
+        jwt_msg = await bot.ask(
+            m.chat.id,
+            "__Adda247 link detected.\n\nSend purchased token for downloading pdf."
+        )
+            raw_text8 = jwt_msg.text.strip()
+            try:
+                await jwt_msg.delete()
+            except:
+                pass
     
     count = int(raw_text)
     arg = int(raw_text)
@@ -716,6 +730,25 @@ async def txt_handler(bot: Client, m: Message):
                 appxkey = url.split('*')[1]
                 url = url.split('*')[0]
 
+            elif "amazonaws.com/ivs" in url:
+                url = f"https://luciferbypass.mrlucifer.workers.dev/?adda={url}"
+
+            elif "raonetech.online/get/appx/" in url:
+                async with ClientSession() as session:
+                    async with session.get(url) as resp:
+                        data = await resp.json()
+                stream_url = data.get("link")
+                if stream_url:
+                    url = f"https://luciferbypass.mrlucifer.workers.dev/?stream={url}"
+
+            elif "raonetech.online/get/appx-pdf/" in url:
+                async with ClientSession() as session:
+                    async with session.get(
+                        url,
+                        allow_redirects=True
+                    ) as resp:
+                        url = str(resp.url)
+
             elif "vimeo.com" in url or "player.vimeo.com" in url:
                 with requests.Session() as session:
                     url = helper.get_m3u8(session, url)
@@ -734,6 +767,7 @@ async def txt_handler(bot: Client, m: Message):
                         f"**Index**: {str(count).zfill(3)}\n\n**Title**: {name1}\n\n**Batch**: {b_name}\n\n**Link**: {url}\n\n**Error**: Live Stream Detetcted - SKIPPED"
                     )
                     count += 1
+                    failed_count += 1
                     continue
                     
            
@@ -809,7 +843,26 @@ async def txt_handler(bot: Client, m: Message):
                             current_topic_id = None
                             continue
                         raise
-
+                elif ".store.adda247.com" in url:
+                        try:
+                            headers = {
+                                "User-Agent": "Mozilla/5.0",
+                                "x-jwt-token": raw_text8
+                            }
+                            response = requests.get(url, headers=headers, stream=True)
+                            with open(f"{name}.pdf", "wb") as f:
+                                for chunk in response.iter_content(chunk_size=1024*1024):
+                                    if chunk:
+                                        f.write(chunk)
+                            sent = await send_to_channel(bot.send_document, topic_id=current_topic_id, chat_id=channel_id, document=f'{name}.pdf', caption=cc1)
+                            count += 1
+                            success_count += 1
+                            if os.path.exists(f"{name}.pdf"):
+                                os.remove(f"{name}.pdf")
+                        except Exception as e:
+                            await m.reply_text(f"Adda247 pdf error: {e}")
+                            count += 1
+                            failed_count += 1
                 elif ".pdf" in url:
                     if "cwmediabkt99" in url:
                         max_retries = 15  # Define the maximum number of retries
